@@ -1,0 +1,65 @@
+/*
+ * Sabil Books design tokens — canonical source is `sabil_design_v1.html`.
+ * Mirrored into tailwind.config.ts under theme.extend so plain CSS and
+ * Tailwind utilities can never drift. No colour, radius or shadow outside
+ * this file may appear in product UI.
+ */
+:root {
+  /* Colour */
+  --ink: #12233d;
+  --marine: #1b3a5c;
+  --marine-dark: #0f2a45;
+  --parchment: #f7f4ec;
+  --paper: #fffefb;
+  --paper-tint: #fbfaf5;
+  --brass: #9c7a3c;
+  --brass-bg: #f1e6d1;
+  --slate: #5b6472;
+  --slate-bg: #e9e7de;
+  --line: #ddd6c7;
+  --green: #2f6b4f;
+  --green-bg: #e3eee7;
+  --red: #a23b32;
+  --red-bg: #f5e4e1;
+  /* Hover for the red text button, and body copy on --red-bg. Gray on a tinted
+     ground washes out, so both are the ground's own hue darkened, not slate. */
+  --red-hover: #8a3029;
+  --red-ink: #6f2b24;
+  --topnav: #c9cfd8;
+  /* Text, icons and hairlines on the dark surfaces (--ink topbar, --marine buttons). */
+  --on-dark: #ffffff;
+  --on-dark-muted: color-mix(in srgb, var(--topnav) 70%, transparent);
+  --line-on-dark: color-mix(in srgb, var(--on-dark) 30%, transparent);
+
+  /* Modal scrim. One value for every native <dialog> in the product. */
+  --backdrop: color-mix(in srgb, var(--ink) 45%, transparent);
+
+  /* Type */
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Source Serif 4', ui-serif, Georgia, serif;
+
+  /* Radius — interactive controls only. Structural rows stay square. */
+  --radius-control: 4px;
+
+  /* Motion */
+  --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 120ms;
+  --dur-base: 180ms;
+  --dur-slow: 240ms;
+
+  /* Semantic z-index scale. Never use a bare number. */
+  --z-dropdown: 10;
+  --z-sticky: 20;
+  --z-backdrop: 30;
+  --z-modal: 40;
+  --z-toast: 50;
+  --z-tooltip: 60;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cat > /tmp/claude-501/probe.mjs <<'EOF'\\nimport { chromium } from 'playwright'\\nconst BASE='http://localhost:5173'\\nconst b=await chromium.launch()\\nconst ctx=await b.newContext({viewport:...",
+  "error": "Exit code 1\nnode:internal/modules/esm/resolve:857\n  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);\n        ^\n\nError [ERR_MODULE_NOT_FOUND]: Cannot find package 'playwright' imported from /private/tmp/claude-501/probe.mjs\n    at packageResolve (node:internal/modules/esm/resolve:857:9)\n    at moduleResolve (node:internal/modules/esm/resolve:926:18)\n    at defaultResolve (node:internal/modules/esm/resolve:1056:11)\n    at ModuleLoader.defaultResolve (node:internal/modules/es...",
+  "timestamp": "2026-09-13T15:57:43.418Z",
+  "retry_count": 1
+}

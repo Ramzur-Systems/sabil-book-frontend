@@ -1,0 +1,96 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--parchment);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* One focus treatment for the whole product: a marine ring, never removed. */
+  :focus-visible {
+    outline: 2px solid var(--marine);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  ::placeholder {
+    /* Placeholders hit the same 4.5:1 floor as body text — --slate, not a lighter gray. */
+    color: var(--slate);
+    opacity: 1;
+  }
+}
+
+@layer components {
+  /* Shared field control surface: used by Field.vue's input/textarea/select slots. */
+  .sb-control {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-control);
+    transition: border-color var(--dur-fast) var(--ease-out-quart);
+  }
+
+  .sb-control:hover:not(:disabled) {
+    border-color: var(--slate);
+  }
+
+  .sb-control:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  textarea.sb-control {
+    min-height: 96px;
+    resize: vertical;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+}

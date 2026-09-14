@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sabil Books — дизайн v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12233D;
+    --marine:#1B3A5C;
+    --marine-dark:#0F2A45;
+    --parchment:#F7F4EC;
+    --paper:#FFFEFB;
+    --brass:#9C7A3C;
+    --brass-bg:#F1E6D1;
+    --slate:#5B6472;
+    --slate-bg:#E9E7DE;
+    --line:#DDD6C7;
+    --green:#2F6B4F;
+    --green-bg:#E3EEE7;
+    --red:#A23B32;
+    --red-bg:#F5E4E1;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--parchment);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .serif{font-family:'Source Serif 4', serif;}
+  .wrap{max-width:960px;margin:0 auto;padding:0 32px 96px;}
+
+  .topbar{background:var(--ink);color:var(--parchment);padding:20px 0;margin-bottom:56px;}
+  .topbar-inner{max-width:960px;margin:0 auto;padding:0 32px;display:flex;align-items:baseline;justify-content:space-between;}
+  .wordmark{font-family:'Source Serif 4', serif;font-size:22px;font-weight:600;letter-spacing:0.2px;}
+  .topnav{display:flex;gap:28px;font-size:14px;color:#C9CFD8;}
+  .topnav span:first-child{color:#fff;}
+
+  .journey-title{
+    font-family:'Source Serif 4', serif;font-size:24px;font-weight:500;
+    padding-top:48px;margin:0 0 32px;border-top:2px solid var(--ink);
+  }
+  .journey-title:first-of-type{border-top:none;padding-top:0;}
+
+  .screen-label{font-size:13px;color:var(--slate);margin:0 0 10px;padding-bottom:10px;border-bottom:1px solid var(--line);}
+  .screen-label b{color:var(--ink);font-weight:600;}
+  section.screen{margin-bottom:80px;}
+
+  .badge{display:inline-block;font-size:13px;color:var(--brass);background:var(--brass-bg);padding:4px 12px;border-radius:4px;margin-bottom:16px;}
+  h1.request-title{font-size:30px;font-weight:500;line-height:1.3;margin:0 0 24px;max-width:640px;}
+  h2.screen-title{font-size:22px;font-weight:500;margin:0 0 24px;}
+  .stat-row{display:flex;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin-bottom:32px;}
+  .stat{flex:1;padding:16px 24px 16px 0;border-right:1px solid var(--line);}
+  .stat:last-child{border-right:none;}
+  .stat:first-child{padding-left:0;}
+  .stat-label{font-size:12px;color:var(--slate);margin-bottom:4px;}
+  .stat-value{font-size:18px;font-weight:500;}
+
+  .row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+  .subhead{font-size:16px;font-weight:600;margin:32px 0 16px;}
+  .subhead:first-child{margin-top:0;}
+
+  .ledger-row{display:flex;align-items:flex-start;gap:20px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--line);padding:20px 24px;margin-bottom:12px;}
+  .ledger-row.selected{border-left:3px solid var(--marine);background:#FBFAF5;}
+  .avatar{width:40px;height:40px;border-radius:50%;background:var(--brass-bg);color:var(--brass);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;}
+  .ledger-main{flex:1;min-width:0;}
+  .ledger-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;}
+  .provider-name{font-weight:600;font-size:15px;}
+  .rating{font-size:13px;color:var(--brass);}
+  .pitch{font-family:'Source Serif 4', serif;font-style:italic;font-size:14px;color:var(--slate);line-height:1.5;max-width:520px;}
+  .ledger-meta{font-size:13px;color:var(--slate);margin-top:8px;display:flex;gap:16px;}
+  .ledger-aside{text-align:right;flex-shrink:0;min-width:120px;}
+  .price{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;margin-bottom:12px;}
+
+  .btn{display:inline-block;font-family:inherit;font-size:14px;font-weight:500;padding:9px 18px;border-radius:4px;border:1px solid transparent;cursor:pointer;}
+  .btn-primary{background:var(--marine);color:#fff;}
+  .btn-secondary{background:transparent;color:var(--marine);border:1px solid var(--marine);}
+  .btn-text{background:none;border:none;color:var(--red);font-size:13px;padding:0;text-decoration:underline;}
+
+  .request-row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;background:var(--paper);border:1px solid var(--line);border-left:3px solid var(--line);padding:20px 24px;margin-bottom:12px;}
+  .request-row-title{font-family:'Source Serif 4', serif;font-size:18px;font-weight:500;margin:6px 0 10px;}
+  .request-row-meta{font-size:13px;color:var(--slate);display:flex;gap:16px;}
+
+  .stepper{display:flex;margin:8px 0 48px;}
+  .step{flex:1;position:relative;padding-top:14px;}
+  .step-line{position:absolute;top:5px;left:0;right:0;height:2px;background:var(--line);}
+  .step:first-child .step-line{left:50%;}
+  .step:last-child .step-line{right:50%;}
+  .step.done .step-line, .step.current .step-line{background:var(--marine);}
+  .step-dot{position:absolute;top:0;left:50%;transform:translateX(-50%);width:12px;height:12px;border-radius:50%;background:var(--paper);border:2px solid var(--line);}
+  .step.done .step-dot{background:var(--green);border-color:var(--green);}
+  .step.current .step-dot{background:var(--marine);border-color:var(--marine);}
+  .step-label{text-align:center;font-size:13px;color:var(--slate);}
+  .step.current .step-label{color:var(--ink);font-weight:600;}
+
+  .file-card{display:flex;align-items:center;gap:16px;background:var(--paper);border:1px solid var(--line);padding:18px 24px;margin-bottom:32px;}
+  .file-icon{width:36px;height:36px;background:var(--brass-bg);color:var(--brass);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;}
+  .file-name{font-weight:500;font-size:15px;}
+  .file-meta{font-size:13px;color:var(--slate);margin-top:2px;}
+  .file-download{margin-left:auto;font-size:14px;color:var(--marine);text-decoration:none;font-weight:500;}
+  .actions{display:flex;align-items:center;gap:20px;}
+
+  .swatch-strip{display:flex;gap:0;margin-bottom:56px;border:1px solid var(--line);}
+  .swatch{flex:1;padding:14px 16px;font-size:12px;}
+  .swatch-name{display:block;margin-top:6px;}
+
+  /* forms */
+  .field{margin-bottom:22px;}
+  .field label{display:block;font-size:13px;color:var(--slate);margin-bottom:6px;}
+  input[type=text], input[type=number], input[type=date], textarea, select{
+    width:100%;font-family:inherit;font-size:15px;padding:10px 12px;
+    border:1px solid var(--line);border-radius:4px;background:var(--paper);color:var(--ink);
+  }
+  textarea{min-height:96px;resize:vertical;}
+  .field-row{display:flex;gap:20px;}
+  .field-row .field{flex:1;}
+  .wizard-progress{font-size:13px;color:var(--slate);margin-bottom:20px;}
+
+  .cat-grid{display:flex;gap:12px;margin-bottom:32px;}
+  .cat-card{flex:1;border:1px solid var(--line);padding:16px;background:var(--paper);position:relative;}
+  .cat-card.selected{border-color:var(--marine);background:#FBFAF5;}
+  .cat-card.selected::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;background:var(--marine);}
+  .cat-card-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+  .cat-card-desc{font-size:12px;color:var(--slate);}
+
+  /* dashboard mini rows */
+  .mini-row{display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:1px solid var(--line);}
+  .mini-row:last-child{border-bottom:none;}
+  .mini-title{font-size:15px;font-weight:500;}
+  .mini-meta{font-size:13px;color:var(--slate);margin-top:3px;}
+
+  .status{display:inline-block;font-size:12px;padding:3px 10px;border-radius:4px;font-weight:500;}
+  .status-brass{background:var(--brass-bg);color:var(--brass);}
+  .status-green{background:var(--green-bg);color:var(--green);}
+  .status-red{background:var(--red-bg);color:var(--red);}
+  .status-slate{background:var(--slate-bg);color:var(--slate);}
+
+  /* checkout */
+  .summary{background:var(--paper);border:1px solid var(--line);padding:24px;margin-bottom:24px;max-width:480px;}
+  .summary-line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .summary-line:last-child{border-bottom:none;}
+  .summary-line.total{font-weight:600;font-size:17px;padding-top:16px;}
+  .pay-methods{display:flex;gap:12px;margin-bottom:32px;max-width:480px;}
+  .pay-method{flex:1;border:1px solid var(--line);padding:14px;text-align:center;font-size:14px;background:var(--paper);position:relative;}
+  .pay-method.selected{border-color:var(--marine);background:#FBFAF5;}
+  .pay-method.selected::before{content:'';position:absolute;left:-1px;top:-1px;bottom:-1px;width:3px;background:var(--marine);}
+
+  /* review */
+  .stars{font-size:30px;color:var(--line);letter-spacing:6px;margin-bottom:24px;}
+  .stars .filled{color:var(--brass);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="wordmark">Sabil Books</div>
+    <div class="topnav"><span>Requests</span><span>Browse</span><span>Messages</span><span>Profile</span></div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="swatch-strip">
+    <div class="swatch" style="background:var(--ink);color:#fff;">ink<span class="swatch-name">#12233D</span></div>
+    <div class="swatch" style="background:var(--marine);color:#fff;">marine<span class="swatch-name">#1B3A5C</span></div>
+    <div class="swatch" style="background:var(--parchment);color:var(--ink);">parchment<span class="swatch-name">#F7F4EC</span></div>
+    <div class="swatch" style="background:var(--brass);color:#fff;">brass<span class="swatch-name">#9C7A3C</span></div>
+    <div class="swatch" style="background:var(--slate);color:#fff;">slate<span class="swatch-name">#5B6472</span></div>
+  </div>
+
+  <!-- ============ CUSTOMER JOURNEY ============ -->
+  <h2 class="journey-title">Customer journey</h2>
+
+  <!-- Dashboard -->
+  <section class="screen">
+    <p class="screen-label"><b>Заказчик</b> — дашборд</p>
+    <div class="row-between">
+      <h2 class="screen-title serif">Your workspace</h2>
+      <button class="btn btn-primary">New request</button>
+    </div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">Awaiting offers</div><div class="stat-value">2</div></div>
+      <div class="stat"><div class="stat-label">Active orders</div><div class="stat-value">1</div></div>
+      <div class="stat"><div class="stat-label">Completed</div><div class="stat-value">6</div></div>
+    </div>
+
+    <p class="subhead">Requests awaiting offers</p>
+    <div class="mini-row">
+      <div><div class="mini-title">Competitive landscape brief: enterprise data-observability tools</div><div class="mini-meta">3 offers · 4 days left</div></div>
+      <span class="status status-brass">Published</span>
+    </div>
+    <div class="mini-row">
+      <div><div class="mini-title">Vendor onboarding SOP for a 40-person procurement team</div><div class="mini-meta">No offers yet · 2 days left</div></div>
+      <span class="status status-brass">Published</span>
+    </div>
+
+    <p class="subhead">Active orders</p>
+    <div class="mini-row">
+      <div><div class="mini-title">PMP exam practice set with worked scenarios</div><div class="mini-meta">Nurlan T. · delivered, under review</div></div>
+      <span class="status status-green">Under review</span>
+    </div>
+  </section>
+
+  <!-- Create request -->
+  <section class="screen">
+    <p class="screen-label"><b>Заказчик</b> — создание запроса (мастер)</p>
+    <p class="wizard-progress">Step 2 of 3 — Details</p>
+    <h2 class="screen-title serif">What kind of material do you need?</h2>
+
+    <div class="cat-grid">
+      <div class="cat-card selected"><div class="cat-card-title">Research brief</div><div class="cat-card-desc">Market, competitor or industry analysis</div></div>
+      <div class="cat-card"><div class="cat-card-title">Template &amp; SOP</div><div class="cat-card-desc">Reusable process or document template</div></div>
+      <div class="cat-card"><div class="cat-card-title">Certification prep</div><div class="cat-card-desc">Study materials for a professional exam</div></div>
+    </div>
+
+    <div class="field">
+      <label>Title</label>
+      <input type="text" value="Competitive landscape brief: enterprise data-observability tools">
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea>Need a comparison of the top 5 vendors in the data-observability space, covering pricing tiers, integration depth, and recent funding. Will use this for an internal buy decision.</textarea>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Budget min, $</label><input type="number" value="450"></div>
+      <div class="field"><label>Budget max, $</label><input type="number" value="650"></div>
+      <div class="field"><label>Deadline</label><input type="date" value="2026-09-14"></div>
+    </div>
+    <button class="btn btn-primary">Continue</button>
+  </section>
+
+  <!-- Request detail with offers -->
+  <section class="screen">
+    <p class="screen-label"><b>Заказчик</b> — детали запроса, сравнение предложений (ключевая механика reverse-маркетплейса)</p>
+    <span class="badge">Research brief</span>
+    <h1 class="serif request-title">Competitive landscape brief: enterprise data-observability tools</h1>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">Budget</div><div class="stat-value">$450–650</div></div>
+      <div class="stat"><div class="stat-label">Deadline</div><div class="stat-value">4 days left</div></div>
+      <div class="stat"><div class="stat-label">Offers</div><div class="stat-value">3 received</div></div>
+    </div>
+    <p class="subhead">Offers</p>
+    <div class="ledger-row">
+      <div class="avatar">AK</div>
+      <div class="ledger-main">
+        <div class="ledger-head"><span class="provider-name">Aigerim K.</span><span class="rating">★ 4.9</span></div>
+        <p class="pitch">I've published two landscape reports on enterprise infrastructure buyers this year, both cited by procurement teams. I'll include a comparison matrix and named vendor sourcing.</p>
+        <div class="ledger-meta"><span>Delivery in 3 days</span><span>18 completed orders</span></div>
+      </div>
+      <div class="ledger-aside"><div class="price">$520</div><button class="btn btn-secondary">Message</button></div>
+    </div>
+    <div class="ledger-row selected">
+      <div class="avatar">NT</div>
+      <div class="ledger-main">
+        <div class="ledger-head"><span class="provider-name">Nurlan T.</span><span class="rating">★ 4.7</span></div>
+        <p class="pitch">Former analyst at a data-infra vendor, so I know the category from the inside. Can turn this around fast without losing depth on the technical comparison.</p>
+        <div class="ledger-meta"><span>Delivery in 2 days</span><span>31 completed orders</span></div>
+      </div>
+      <div class="ledger-aside"><div class="price">$480</div><button class="btn btn-primary">Accept</button></div>
+    </div>
+    <div class="ledger-row">
+      <div class="avatar">DS</div>
+      <div class="ledger-main">
+        <div class="ledger-head"><span class="provider-name">Dana S.</span><span class="rating">★ 5.0</span></div>
+        <p class="pitch">I'll run primary interviews with two vendors' sales engineers rather than relying only on public materials, so the brief has findings your team can't get from a search engine.</p>
+        <div class="ledger-meta"><span>Delivery in 5 days</span><span>9 completed orders</span></div>
+      </div>
+      <div class="ledger-aside"><div class="price">$610</div><button class="btn btn-secondary">Message</button></div>
+    </div>
+  </section>
+
+  <!-- Checkout -->
+  <section class="screen">
+    <p class="screen-label"><b>Заказчик</b> — оплата принятого предложения</p>
+    <h2 class="screen-title serif">Confirm and pay</h2>
+    <div class="summary">
+      <div class="summary-line"><span>Nurlan T. — Competitive landscape brief</span><span>$480</span></div>
+      <div class="summary-line"><span>Service fee</span><span>$58</span></div>
+      <div class="summary-line total"><span>Total</span><span>$538</span></div>
+    </div>
+    <p class="subhead" style="margin-top:0;">Payment method</p>
+    <div class="pay-methods">
+      <div class="pay-method selected">Card</div>
+      <div class="pay-method">Local bank (KZ)</div>
+    </div>
+    <button class="btn btn-primary">Pay $538</button>
+  </section>
+
+  <!-- Order status -->
+  <section class="screen">
+    <p class="screen-label"><b>Заказчик</b> — статус сделки и приёмка результата</p>
+    <span class="badge">Research brief</span>
+    <h1 class="serif request-title" style="font-size:24px;">Competitive landscape brief — order with Nurlan T.</h1>
+    <div class="stepper">
+      <div class="step done"><div class="step-line"></div><div class="step-dot"></div><div class="step-label">Funded</div></div>
+      <div class="step done"><div class="step-line"></div><div class="step-dot"></div><div class="step-label">Delivered</div></div>
+      <div class="step current"><div class="step-line"></div><div class="step-dot"></div><div class="step-label">Under review</div></div>
+      <div class="step"><div class="step-line"></div><div class="step-dot"></div><div class="step-label">Completed</div></div>
+    </div>
+    <div class="file-card">
+      <div class="file-icon">PDF</div>
+      <div><div class="file-name">data-observability-landscape-brief.pdf</div><div class="file-meta">2.4 MB · uploaded 6 hours ago · scanned, clean</div></div>
+      <a class="file-download" href="#">Download</a>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary">Confirm delivery</button>
+      <button class="btn btn-secondary">Request a correction</button>
+      <button class="btn-text">Open a dispute</button>
+    </div>
+  </section>
+
+  <!-- Review -->
+  <section class="screen">
+    <p class="screen-label"><b>Заказчик</b> — отзыв после завершения сделки</p>
+    <h2 class="screen-title serif">Rate this delivery</h2>
+    <p style="color:var(--slate);font-size:14px;margin-top:-12px;">Competitive landscape brief — completed by Nurlan T.</p>
+    <div class="stars"><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span class="filled">★</span><span>★</span></div>
+    <div class="field" style="max-width:480px;">
+      <label>What stood out about this delivery?</label>
+      <textarea placeholder="Share detail that would help other customers"></textarea>
+    </div>
+    <button class="btn btn-primary">Submit review</button>
+  </section>
+
+  <!-- ============ PROVIDER JOURNEY ============ -->
+  <h2 class="journey-title">Provider journey</h2>
+
+  <!-- Browse -->
+  <section class="screen">
+    <p class="screen-label"><b>Поставщик</b> — лента опубликованных запросов (Browse)</p>
+    <div class="request-row">
+      <div><span class="badge">Research brief</span><div class="request-row-title serif">Competitive landscape brief: enterprise data-observability tools</div><div class="request-row-meta"><span>$450–650</span><span>4 days left</span><span>3 offers so far</span></div></div>
+      <button class="btn btn-primary">Submit offer</button>
+    </div>
+    <div class="request-row">
+      <div><span class="badge">Certification prep</span><div class="request-row-title serif">PMP exam practice set with worked scenarios, weeks 1–4</div><div class="request-row-meta"><span>$180–260</span><span>6 days left</span><span>1 offer so far</span></div></div>
+      <button class="btn btn-primary">Submit offer</button>
+    </div>
+    <div class="request-row">
+      <div><span class="badge">Template &amp; SOP</span><div class="request-row-title serif">Vendor onboarding SOP for a 40-person procurement team</div><div class="request-row-meta"><span>$300–400</span><span>2 days left</span><span>No offers yet</span></div></div>
+      <button class="btn btn-primary">Submit offer</button>
+    </div>
+  </section>
+
+  <!-- Submit offer -->
+  <section class="screen">
+    <p class="screen-label"><b>Поставщик</b> — отправка предложения</p>
+    <p style="color:var(--slate);font-size:13px;margin-bottom:6px;">Responding to</p>
+    <h2 class="screen-title serif" style="font-size:20px;">Vendor onboarding SOP for a 40-person procurement team</h2>
+    <div class="field-row">
+      <div class="field"><label>Your price, $</label><input type="number" value="340"></div>
+      <div class="field"><label>Delivery time, days</label><input type="number" value="4"></div>
+    </div>
+    <div class="field">
+      <label>Message to the customer</label>
+      <textarea placeholder="Explain your approach and what makes your delivery reliable">I've built onboarding SOPs for two procurement teams of similar size. I'll structure it as a step-by-step checklist with role-based sign-offs, ready to drop into your existing wiki.</textarea>
+    </div>
+    <button class="btn btn-primary">Submit offer</button>
+  </section>
+
+  <!-- My offers -->
+  <section class="screen">
+    <p class="screen-label"><b>Поставщик</b> — мои предложения</p>
+    <div class="mini-row">
+      <div><div class="mini-title">Competitive landscape brief: enterprise data-observability tools</div><div class="mini-meta">$480 · submitted 2 days ago</div></div>
+      <span class="status status-green">Accepted</span>
+    </div>
+    <div class="mini-row">
+      <div><div class="mini-title">PMP exam practice set with worked scenarios</div><div class="mini-meta">$220 · submitted 5 hours ago</div></div>
+      <span class="status status-brass">Submitted</span>
+    </div>
+    <div class="mini-row">
+      <div><div class="mini-title">Quarterly OKR template for a marketing team</div><div class="mini-meta">$260 · submitted 6 days ago</div></div>
+      <span class="status status-slate">Withdrawn</span>
+    </div>
+  </section>
+
+  <!-- Earnings -->
+  <section class="screen">
+    <p class="screen-label"><b>Поставщик</b> — заработок и выплаты</p>
+    <h2 class="screen-title serif">Earnings</h2>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-label">Total earned</div><div class="stat-value">$4,260</div></div>
+      <div class="stat"><div class="stat-label">Pending payout</div><div class="stat-value">$480</div></div>
+      <div class="stat"><div class="stat-label">This month</div><div class="stat-value">$1,120</div></div>
+    </div>
+    <div class="mini-row">
+      <div><div class="mini-title">Competitive landscape brief: enterprise data-observability tools</div><div class="mini-meta">Payout via Payoneer</div></div>
+      <span class="status status-brass">Pending</span>
+    </div>
+    <div class="mini-row">
+      <div><div class="mini-title">Quarterly OKR template for a marketing team</div><div class="mini-meta">Payout via Payoneer</div></div>
+      <span class="status status-green">Paid</span>
+    </div>
+    <div class="mini-row">
+      <div><div class="mini-title">Vendor risk-assessment checklist</div><div class="mini-meta">Payout via local bank</div></div>
+      <span class="status status-green">Paid</span>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

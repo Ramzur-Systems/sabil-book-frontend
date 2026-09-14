@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "entries": {
+    "466399dafa2d20f60587180bad0a07358eb7f2bce724df0ff682f038ad33f5ad": {
+      "last_emitted_at_ms": 1789315255980,
+      "message": "Read multiple files in parallel when possible for faster analysis."
+    },
+    "79a93d4a2f8f50b95f852280616242fee1855dc99a3c75211917f55e72e95fae": {
+      "last_emitted_at_ms": 1789315035266,
+      "message": "Use parallel execution for independent tasks. Use run_in_background for long operations (npm install, builds, tests)."
+    },
+    "14b6a93abe19cde135ef916064220d74bf32b4de41887d208516cfded0402de3": {
+      "last_emitted_at_ms": 1789314670727,
+      "message": "Spawning agent: unknown (inherit) | Task: Audit accessibility and UX quality"
+    },
+    "83993f306205db96370ad4441e430625f2171b48b444dcb2a78bc68f6f09160f": {
+      "last_emitted_at_ms": 1789314646743,
+      "message": "Spawning agent: unknown (inherit) | Task: Audit business logic conformance"
+    }
+  },
+  "updated_at": "2026-09-13T16:00:55.980Z"
+}

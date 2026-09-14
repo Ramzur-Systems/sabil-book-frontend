@@ -1,0 +1,12 @@
+{
+  "framework": "vite-vue",
+  "devCommand": "npm run dev",
+  "devUrl": "http://localhost:5173",
+  "entry": "index.html",
+  "sourceDirs": ["src"],
+  "routes": [
+    "/app", "/app/requests/new", "/app/requests/1", "/app/orders/1/pay",
+    "/app/orders/1", "/app/orders/1/review", "/app/browse",
+    "/app/requests/1/offer", "/app/offers", "/app/earnings"
+  ]
+}
