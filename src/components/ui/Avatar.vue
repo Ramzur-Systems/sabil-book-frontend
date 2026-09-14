@@ -20,7 +20,7 @@ const initials = computed(() => initialsOf(props.name))
   height: 40px;
   font-size: 14px;
   font-weight: 600;
-  color: var(--brass);
+  color: var(--brass-text);
   background: var(--brass-bg);
   border-radius: 50%;
 }

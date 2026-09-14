@@ -94,7 +94,7 @@ function starLabel(value: number): string {
 
 .sb-stars--readonly > span.is-filled,
 .sb-stars__star.is-filled {
-  color: var(--brass);
+  color: var(--brass-text);
 }
 
 .sb-stars__star {

@@ -48,6 +48,7 @@ const tag = computed(() => (props.to && !inert.value ? RouterLink : 'button'))
   align-items: center;
   justify-content: center;
   gap: 8px;
+  min-height: 44px;
   padding: 9px 18px;
   font-family: var(--font-sans);
   font-size: 14px;
@@ -67,8 +68,13 @@ const tag = computed(() => (props.to && !inert.value ? RouterLink : 'button'))
   width: 100%;
 }
 
+/*
+ * A disabled control is exempt from 1.4.3, but a user still has to read what
+ * they are waiting on. 0.45 measured 2.1-2.5:1; 0.6 keeps the state legible as
+ * "off" while leaving the label readable.
+ */
 .sb-btn.is-inert {
-  opacity: 0.45;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
@@ -89,8 +95,14 @@ const tag = computed(() => (props.to && !inert.value ? RouterLink : 'button'))
   background: var(--paper-tint);
 }
 
+/*
+ * Destructive last resort. Vertical padding plus the shared 44px floor give it
+ * a real target - 17px tall for "Open a dispute" was a trap - while the
+ * underline stays flush to the 13px label.
+ */
 .sb-btn--text {
-  padding: 0;
+  min-height: 44px;
+  padding: 12px 0;
   font-size: 13px;
   color: var(--red);
   background: none;

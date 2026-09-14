@@ -23,7 +23,17 @@ const queryOptions: VueQueryPluginOptions = {
 }
 
 async function bootstrap() {
-  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === 'true') {
+  /*
+   * The mock API is gated on VITE_USE_MOCKS alone, NOT on import.meta.env.DEV.
+   * The marketplace endpoints don't exist server-side yet, so the deployed
+   * demo build runs against MSW too — gating on DEV would ship a production
+   * bundle where every request 404s and the app renders empty.
+   *
+   * The import stays dynamic, so when VITE_USE_MOCKS is "false" the mock
+   * module and its fixtures are never fetched and Rollup keeps them in a
+   * separate chunk, out of the main bundle.
+   */
+  if (import.meta.env.VITE_USE_MOCKS === 'true') {
     const { startMockServer } = await import('./mocks/browser')
     await startMockServer()
   }

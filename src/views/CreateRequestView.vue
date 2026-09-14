@@ -7,7 +7,7 @@
  * moderation, so a half-written request never reaches a provider's feed and a
  * retry never leaves a duplicate draft behind.
  */
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { z } from 'zod'
@@ -60,7 +60,41 @@ const budgetMin = ref<string | number>('')
 const budgetMax = ref<string | number>('')
 const deadline = ref('')
 
-const errors = ref<Record<string, string>>({})
+/** Fields the user has left. A field shows its error once blurred or once submitted. */
+const touched = ref(new Set<string>())
+/** Flipped by a failed attempt on the step it belongs to. */
+const categorySubmitted = ref(false)
+const detailsSubmitted = ref(false)
+
+const FIELD_IDS = {
+  title: 'request-title',
+  description: 'request-description',
+  budgetMin: 'request-budget-min',
+  budgetMax: 'request-budget-max',
+  deadline: 'request-deadline',
+} as const
+
+type FieldName = keyof typeof FIELD_IDS
+
+const FIELD_ORDER: readonly FieldName[] = [
+  'title',
+  'description',
+  'budgetMin',
+  'budgetMax',
+  'deadline',
+]
+
+function touch(field: FieldName) {
+  touched.value.add(field)
+}
+
+/**
+ * The error summary is a snapshot of the last failed submit, not a live view:
+ * it must not re-announce itself on every keystroke while the user fixes it.
+ */
+const summary = ref<{ id: string; message: string }[]>([])
+const summaryEl = ref<HTMLElement | null>(null)
+const categoryGroup = ref<HTMLElement | null>(null)
 
 interface WizardDraft extends Record<string, unknown> {
   step: number
@@ -153,6 +187,55 @@ const detailsValues = computed(() => ({
   deadline: deadline.value,
 }))
 
+const detailsResult = computed(() => detailsSchema.safeParse(detailsValues.value))
+
+/** Every rule that currently fails on step 2, regardless of what is shown yet. */
+const allErrors = computed<Record<string, string>>(() =>
+  detailsResult.value.success ? {} : collect(detailsResult.value.error.issues),
+)
+
+const errors = computed<Record<string, string>>(() => {
+  const out: Record<string, string> = {}
+  for (const field of FIELD_ORDER) {
+    const text = allErrors.value[field]
+    if (text && (detailsSubmitted.value || touched.value.has(field))) out[field] = text
+  }
+  return out
+})
+
+const categoryError = computed(() =>
+  categorySubmitted.value && !categoryId.value ? 'Choose a category to continue.' : '',
+)
+
+function clearAttempts() {
+  categorySubmitted.value = false
+  detailsSubmitted.value = false
+  summary.value = []
+}
+
+/** A failed step-2 submit: snapshot the problems and move focus to the summary. */
+async function reportDetailsFailure() {
+  detailsSubmitted.value = true
+  summary.value = FIELD_ORDER.filter((field) => allErrors.value[field]).map((field) => ({
+    id: FIELD_IDS[field],
+    message: allErrors.value[field],
+  }))
+  await nextTick()
+  if (summaryEl.value) {
+    summaryEl.value.focus()
+    return
+  }
+  const first = summary.value[0]
+  if (first) document.getElementById(first.id)?.focus()
+}
+
+/** Step 1 has one control, so focus lands on the radiogroup's first option. */
+async function reportCategoryFailure() {
+  categorySubmitted.value = true
+  await nextTick()
+  categoryGroup.value?.querySelector('input')?.focus()
+}
+
 function draftPayload(): RequestDraft {
   return {
     title: title.value.trim(),
@@ -190,25 +273,24 @@ const publish = useMutation({
 function continueFromCategory() {
   const result = categorySchema.safeParse({ categoryId: categoryId.value ?? '' })
   if (!result.success) {
-    errors.value = collect(result.error.issues)
+    void reportCategoryFailure()
     return
   }
-  errors.value = {}
+  clearAttempts()
   step.value = 1
 }
 
 function continueFromDetails() {
-  const result = detailsSchema.safeParse(detailsValues.value)
-  if (!result.success) {
-    errors.value = collect(result.error.issues)
+  if (!detailsResult.value.success) {
+    void reportDetailsFailure()
     return
   }
-  errors.value = {}
+  clearAttempts()
   step.value = 2
 }
 
 function back() {
-  errors.value = {}
+  clearAttempts()
   step.value = Math.max(0, step.value - 1)
 }
 
@@ -244,17 +326,16 @@ function applyDraft(draft: Record<string, unknown>) {
 function validateAll(): boolean {
   const category = categorySchema.safeParse({ categoryId: categoryId.value ?? '' })
   if (!category.success) {
-    errors.value = collect(category.error.issues)
     step.value = 0
+    void reportCategoryFailure()
     return false
   }
-  const details = detailsSchema.safeParse(detailsValues.value)
-  if (!details.success) {
-    errors.value = collect(details.error.issues)
+  if (!detailsResult.value.success) {
     step.value = 1
+    void reportDetailsFailure()
     return false
   }
-  errors.value = {}
+  clearAttempts()
   return true
 }
 
@@ -317,8 +398,10 @@ const budgetSummary = computed(() =>
         <Button variant="secondary" @click="refetchCategories()">Reload</Button>
       </EmptyState>
       <template v-else>
-        <CategoryPicker v-model="categoryId" :categories="categories" />
-        <p v-if="errors.categoryId" class="sb-wizard__error">{{ errors.categoryId }}</p>
+        <div ref="categoryGroup">
+          <CategoryPicker v-model="categoryId" :categories="categories" />
+        </div>
+        <p v-if="categoryError" class="sb-wizard__error" role="alert">{{ categoryError }}</p>
         <div class="sb-wizard__actions">
           <Button @click="continueFromCategory">Continue</Button>
         </div>
@@ -327,7 +410,16 @@ const budgetSummary = computed(() =>
 
     <!-- Step 2 — details -->
     <form v-else-if="step === 1" novalidate @submit.prevent="continueFromDetails">
-      <Field label="Title" required :error="errors.title">
+      <div v-if="summary.length" ref="summaryEl" class="sb-wizard__errors" role="alert" tabindex="-1">
+        <h2 class="sb-wizard__errors-title">Fix these before continuing</h2>
+        <ul class="sb-wizard__errors-list">
+          <li v-for="item in summary" :key="item.id">
+            <a :href="`#${item.id}`">{{ item.message }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <Field label="Title" required :for-id="FIELD_IDS.title" :error="errors.title">
         <template #default="{ id, describedBy, invalid }">
           <input
             :id="id"
@@ -337,11 +429,17 @@ const budgetSummary = computed(() =>
             autocomplete="off"
             :aria-describedby="describedBy"
             :aria-invalid="invalid || undefined"
+            @blur="touch('title')"
           />
         </template>
       </Field>
 
-      <Field label="Description" required :error="errors.description">
+      <Field
+        label="Description"
+        required
+        :for-id="FIELD_IDS.description"
+        :error="errors.description"
+      >
         <template #default="{ id, describedBy, invalid }">
           <textarea
             :id="id"
@@ -349,12 +447,13 @@ const budgetSummary = computed(() =>
             class="sb-control"
             :aria-describedby="describedBy"
             :aria-invalid="invalid || undefined"
+            @blur="touch('description')"
           />
         </template>
       </Field>
 
       <FieldRow>
-        <Field label="Budget min, $" required :error="errors.budgetMin">
+        <Field label="Budget min, $" required :for-id="FIELD_IDS.budgetMin" :error="errors.budgetMin">
           <template #default="{ id, describedBy, invalid }">
             <input
               :id="id"
@@ -366,10 +465,11 @@ const budgetSummary = computed(() =>
               class="sb-control"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="touch('budgetMin')"
             />
           </template>
         </Field>
-        <Field label="Budget max, $" required :error="errors.budgetMax">
+        <Field label="Budget max, $" required :for-id="FIELD_IDS.budgetMax" :error="errors.budgetMax">
           <template #default="{ id, describedBy, invalid }">
             <input
               :id="id"
@@ -381,10 +481,11 @@ const budgetSummary = computed(() =>
               class="sb-control"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="touch('budgetMax')"
             />
           </template>
         </Field>
-        <Field label="Deadline" required :error="errors.deadline">
+        <Field label="Deadline" required :for-id="FIELD_IDS.deadline" :error="errors.deadline">
           <template #default="{ id, describedBy, invalid }">
             <input
               :id="id"
@@ -393,6 +494,7 @@ const budgetSummary = computed(() =>
               class="sb-control"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="touch('deadline')"
             />
           </template>
         </Field>
@@ -466,6 +568,39 @@ const budgetSummary = computed(() =>
   font-size: 12px;
   font-weight: 500;
   color: var(--red);
+}
+
+.sb-wizard__errors {
+  max-width: 640px;
+  padding: 16px 20px;
+  margin: 0 0 24px;
+  background: var(--red-bg);
+  border: 1px solid var(--red);
+}
+
+.sb-wizard__errors:focus-visible {
+  outline-offset: 0;
+}
+
+.sb-wizard__errors-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--red-ink);
+}
+
+.sb-wizard__errors-list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.sb-wizard__errors-list li + li {
+  margin-top: 4px;
+}
+
+.sb-wizard__errors-list a {
+  color: var(--red-ink);
 }
 
 .sb-wizard__actions {

@@ -85,10 +85,13 @@ function onDialogClick(event: MouseEvent) {
 }
 
 const withdrawMutation = useMutation({
-  mutationFn: (offerId: string) => withdrawOffer(offerId),
-  onSuccess: async () => {
+  mutationFn: (offer: Offer) => withdrawOffer(offer.id),
+  // Withdrawing decrements offerCount on the parent request, so the cached
+  // request detail has to go too — not just the lists.
+  onSuccess: async (_data, offer) => {
     await queryClient.invalidateQueries({ queryKey: queryKeys.myOffers })
     await queryClient.invalidateQueries({ queryKey: queryKeys.requests() })
+    await queryClient.invalidateQueries({ queryKey: queryKeys.request(offer.requestId) })
     ui.notify('Offer withdrawn.', 'success')
     closeDialog()
   },
@@ -103,7 +106,7 @@ const withdrawMutation = useMutation({
 function confirmWithdraw() {
   const offer = pending.value
   if (!offer) return
-  withdrawMutation.mutate(offer.id)
+  withdrawMutation.mutate(offer)
 }
 </script>
 

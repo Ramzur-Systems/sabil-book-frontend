@@ -19,7 +19,6 @@ import { queryKeys } from '@/api/queryKeys'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
 import type { KycStatus } from '@/types/entities'
-import type { StatusTone } from '@/types/status'
 
 const auth = useAuthStore()
 const ui = useUiStore()
@@ -82,19 +81,6 @@ const providerProfileQuery = useQuery({
 const providerKycStatus = computed<KycStatus>(
   () => providerProfileQuery.data.value?.kycStatus ?? 'not_started',
 )
-
-const KYC_TONE: Record<KycStatus, StatusTone> = {
-  not_started: 'slate',
-  pending: 'brass',
-  verified: 'green',
-  rejected: 'red',
-}
-const KYC_LABEL: Record<KycStatus, string> = {
-  not_started: 'Not started',
-  pending: 'Pending',
-  verified: 'Verified',
-  rejected: 'Rejected',
-}
 
 /* ---------- Session ---------- */
 
@@ -172,11 +158,7 @@ function signOut() {
       @retry="providerProfileQuery.refetch()"
     />
     <div v-else class="sb-settings__row">
-      <StatusPill
-        :status="providerKycStatus"
-        :tone="KYC_TONE[providerKycStatus]"
-        :label="KYC_LABEL[providerKycStatus]"
-      />
+      <StatusPill :status="providerKycStatus" />
       <Button variant="secondary" :to="{ name: 'provider-onboarding' }">Edit provider profile</Button>
     </div>
   </template>

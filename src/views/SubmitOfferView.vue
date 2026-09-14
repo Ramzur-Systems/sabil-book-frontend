@@ -3,7 +3,7 @@
  * Provider journey → Submit offer. One request, one bid: price, delivery
  * window and the pitch that has to earn the job in a few sentences.
  */
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { z } from 'zod'
@@ -47,6 +47,10 @@ const requestQuery = useQuery({
 
 const request = computed(() => requestQuery.data.value)
 const isOpen = computed(() => request.value?.status === 'published')
+/** Owner-side reachability: the URL is public, so the block lives here. */
+const isOwnRequest = computed(() => request.value?.isMine === true)
+/** The only condition under which the form may be shown or an offer sent. */
+const canBid = computed(() => isOpen.value && !isOwnRequest.value)
 
 const CLOSED_REASON: Record<RequestStatus, string> = {
   draft: 'The customer has not published it yet.',
@@ -57,9 +61,23 @@ const CLOSED_REASON: Record<RequestStatus, string> = {
   cancelled: 'The customer cancelled it.',
 }
 
-const closedReason = computed(() =>
-  request.value ? CLOSED_REASON[request.value.status] : '',
-)
+/** Why this request can't be bid on right now, in its own terms. */
+const blockedState = computed(() => {
+  const current = request.value
+  if (!current || canBid.value) return null
+  if (current.isMine) {
+    return {
+      title: 'This is your own request',
+      body: "This is your own request. You can't bid on it.",
+      own: true,
+    }
+  }
+  return {
+    title: 'This request is not taking offers',
+    body: CLOSED_REASON[current.status],
+    own: false,
+  }
+})
 
 const budgetLabel = computed(() =>
   request.value
@@ -80,9 +98,26 @@ interface OfferDraftValues extends Record<string, unknown> {
 const priceInput = ref<string | number>('')
 const deliveryInput = ref<string | number>('')
 const message = ref('')
-const showErrors = ref(false)
+/** Fields the user has left. A field shows its error once blurred or once submitted. */
+const touched = ref(new Set<string>())
+/** Flipped by the first failed submit; from then on every error is surfaced. */
+const submitAttempted = ref(false)
 /** A restored draft waiting for the request to load before it submits itself. */
 const armed = ref(false)
+
+const FIELD_IDS = {
+  price: 'offer-price',
+  deliveryDays: 'offer-delivery',
+  message: 'offer-message',
+} as const
+
+type FieldName = keyof typeof FIELD_IDS
+
+const FIELD_ORDER: readonly FieldName[] = ['price', 'deliveryDays', 'message']
+
+function touch(field: FieldName) {
+  touched.value.add(field)
+}
 
 function toNumber(value: string | number): number | undefined {
   if (typeof value === 'number') return Number.isFinite(value) ? value : undefined
@@ -120,9 +155,10 @@ const parsed = computed(() =>
   }),
 )
 
-const errors = computed<Record<string, string>>(() => {
+/** Every rule that currently fails, regardless of whether it is shown yet. */
+const allErrors = computed<Record<string, string>>(() => {
   const result = parsed.value
-  if (!showErrors.value || result.success) return {}
+  if (result.success) return {}
   const out: Record<string, string> = {}
   for (const issue of result.error.issues) {
     const key = String(issue.path[0] ?? '')
@@ -130,6 +166,38 @@ const errors = computed<Record<string, string>>(() => {
   }
   return out
 })
+
+const errors = computed<Record<string, string>>(() => {
+  const out: Record<string, string> = {}
+  for (const field of FIELD_ORDER) {
+    const text = allErrors.value[field]
+    if (text && (submitAttempted.value || touched.value.has(field))) out[field] = text
+  }
+  return out
+})
+
+/**
+ * The error summary is a snapshot of the last failed submit, not a live view:
+ * it must not re-announce itself on every keystroke while the user fixes it.
+ */
+const summary = ref<{ id: string; message: string }[]>([])
+const summaryEl = ref<HTMLElement | null>(null)
+
+/** Shown after a failed submit; focus moves here so the failure is announced. */
+async function reportFailure() {
+  submitAttempted.value = true
+  summary.value = FIELD_ORDER.filter((field) => allErrors.value[field]).map((field) => ({
+    id: FIELD_IDS[field],
+    message: allErrors.value[field],
+  }))
+  await nextTick()
+  if (summaryEl.value) {
+    summaryEl.value.focus()
+    return
+  }
+  const first = summary.value[0]
+  if (first) document.getElementById(first.id)?.focus()
+}
 
 const submitLabel = computed(() => (auth.isAuthenticated ? 'Submit offer' : 'Sign in to submit'))
 
@@ -184,9 +252,10 @@ function applyDraft(draft: Record<string, unknown>) {
 function send() {
   const result = parsed.value
   if (!result.success) {
-    showErrors.value = true
+    void reportFailure()
     return
   }
+  summary.value = []
   offerMutation.mutate({
     price: result.data.price,
     deliveryDays: result.data.deliveryDays,
@@ -208,9 +277,10 @@ function sendToOnboarding() {
 function onSubmit() {
   const result = parsed.value
   if (!result.success) {
-    showErrors.value = true
+    void reportFailure()
     return
   }
+  summary.value = []
 
   // The commit point, and the only place sign-in is asked for.
   if (!auth.isAuthenticated) {
@@ -256,14 +326,19 @@ restoreDraft()
  * never submit the same offer twice.
  */
 watch(
-  () => (requestQuery.isSuccess.value ? isOpen.value : null),
+  () => (requestQuery.isSuccess.value ? canBid.value : null),
   (open) => {
     if (!armed.value || open === null) return
     armed.value = false
     const taken = intent.consume('submit-offer', returnTo)
     if (!taken) return
     if (!open) {
-      ui.notify('This request stopped taking offers while you were signing in.', 'danger')
+      ui.notify(
+        isOwnRequest.value
+          ? "This is your own request. You can't bid on it."
+          : 'This request stopped taking offers while you were signing in.',
+        'danger',
+      )
       return
     }
     ui.notify('You are signed in. Submitting the offer you drafted.')
@@ -284,12 +359,15 @@ watch(
       @retry="() => requestQuery.refetch()"
     />
 
-    <EmptyState
-      v-else-if="request && !isOpen"
-      title="This request is not taking offers"
-      :body="closedReason"
-    >
-      <Button variant="secondary" :to="{ name: 'browse' }">Back to open requests</Button>
+    <EmptyState v-else-if="blockedState" :title="blockedState.title" :body="blockedState.body">
+      <Button
+        v-if="blockedState.own"
+        variant="secondary"
+        :to="{ name: 'request-detail', params: { id: props.id } }"
+      >
+        View the request
+      </Button>
+      <Button v-else variant="secondary" :to="{ name: 'browse' }">Back to open requests</Button>
     </EmptyState>
 
     <template v-else-if="request">
@@ -297,10 +375,26 @@ watch(
       <h1 class="offer-title">{{ request.title }}</h1>
 
       <form class="offer-form" novalidate @submit.prevent="onSubmit">
+        <div
+          v-if="summary.length"
+          ref="summaryEl"
+          class="offer-errors"
+          role="alert"
+          tabindex="-1"
+        >
+          <h2 class="offer-errors__title">Fix these before submitting</h2>
+          <ul class="offer-errors__list">
+            <li v-for="item in summary" :key="item.id">
+              <a :href="`#${item.id}`">{{ item.message }}</a>
+            </li>
+          </ul>
+        </div>
+
         <FieldRow>
           <Field
             label="Your price, $"
             required
+            :for-id="FIELD_IDS.price"
             :hint="`Customer's budget ${budgetLabel}`"
             :error="errors.price"
           >
@@ -315,10 +409,16 @@ watch(
                 step="1"
                 :aria-describedby="describedBy"
                 :aria-invalid="invalid || undefined"
+                @blur="touch('price')"
               />
             </template>
           </Field>
-          <Field label="Delivery time, days" required :error="errors.deliveryDays">
+          <Field
+            label="Delivery time, days"
+            required
+            :for-id="FIELD_IDS.deliveryDays"
+            :error="errors.deliveryDays"
+          >
             <template #default="{ id, describedBy, invalid }">
               <input
                 :id="id"
@@ -331,6 +431,7 @@ watch(
                 step="1"
                 :aria-describedby="describedBy"
                 :aria-invalid="invalid || undefined"
+                @blur="touch('deliveryDays')"
               />
             </template>
           </Field>
@@ -341,7 +442,12 @@ watch(
           it, but say why in your message.
         </p>
 
-        <Field label="Message to the customer" required :error="errors.message">
+        <Field
+          label="Message to the customer"
+          required
+          :for-id="FIELD_IDS.message"
+          :error="errors.message"
+        >
           <template #default="{ id, describedBy, invalid }">
             <textarea
               :id="id"
@@ -352,6 +458,7 @@ watch(
               placeholder="Explain your approach and what makes your delivery reliable"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="touch('message')"
             />
             <p class="offer-counter" aria-live="polite">{{ counterLabel }}</p>
           </template>
@@ -387,6 +494,38 @@ watch(
   max-width: 560px;
 }
 
+.offer-errors {
+  padding: 16px 20px;
+  margin: 0 0 24px;
+  background: var(--red-bg);
+  border: 1px solid var(--red);
+}
+
+.offer-errors:focus-visible {
+  outline-offset: 0;
+}
+
+.offer-errors__title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--red-ink);
+}
+
+.offer-errors__list {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.offer-errors__list li + li {
+  margin-top: 4px;
+}
+
+.offer-errors__list a {
+  color: var(--red-ink);
+}
+
 .offer-number {
   font-variant-numeric: tabular-nums;
 }
@@ -398,7 +537,7 @@ watch(
 .offer-warning {
   margin: -10px 0 22px;
   font-size: 13px;
-  color: var(--brass);
+  color: var(--brass-text);
 }
 
 .offer-gate {

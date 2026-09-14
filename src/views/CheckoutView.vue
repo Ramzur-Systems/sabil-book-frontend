@@ -6,6 +6,7 @@
  */
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import type { RouteLocationRaw } from 'vue-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { getOrder, payOrder } from '@/api/orders'
 import type { PaymentMethod } from '@/api/orders'
@@ -40,6 +41,12 @@ const {
 
 const payable = computed(() => order.value?.status === 'awaiting_payment')
 
+interface BlockedState {
+  title: string
+  body: string
+  link: { to: RouteLocationRaw; label: string }
+}
+
 const summaryLine = computed(() => {
   const current = order.value
   if (!current) return ''
@@ -51,28 +58,65 @@ const total = computed(() =>
   order.value ? formatMoney(order.value.totalCharged, order.value.currency) : '',
 )
 
-/** Why this order can't be funded right now, in the order's own terms. */
-const blockedState = computed(() => {
+/**
+ * Why this order can't be funded right now, in the order's own terms. Escrow
+ * language appears only where the money is actually in escrow: a completed,
+ * refunded or partially resolved order has already paid out, and a cancelled
+ * one never charged.
+ */
+const blockedState = computed<BlockedState | null>(() => {
   const current = order.value
   if (!current || current.status === 'awaiting_payment') return null
+  const orderLink = {
+    to: { name: 'order-detail', params: { id: props.id } },
+    label: 'View the order',
+  }
   switch (current.status) {
+    case 'funded':
+      return {
+        title: 'This order is already funded',
+        body: 'The amount is held in escrow. Track the delivery on the order page.',
+        link: orderLink,
+      }
+    case 'delivered':
+    case 'under_review':
+      return {
+        title: 'The delivery is in',
+        body: 'The amount stays in escrow until you accept the delivery. Review it on the order page.',
+        link: { to: orderLink.to, label: 'Review the delivery' },
+      }
+    case 'completed':
+      return {
+        title: 'This order is complete',
+        body: 'You accepted the delivery and the escrow balance was released to the provider. Nothing is left to pay.',
+        link: orderLink,
+      }
+    case 'disputed':
+      return {
+        title: 'This order is in dispute',
+        body: 'The escrow balance is frozen while the case is reviewed. It cannot be paid into or released until there is an outcome.',
+        link: orderLink,
+      }
+    case 'refunded':
+      return {
+        title: 'This order was refunded',
+        body: 'The full escrow balance was returned to you. There is nothing left to pay.',
+        link: orderLink,
+      }
+    case 'partially_resolved':
+      return {
+        title: 'This order was partially resolved',
+        body: 'The escrow balance was split between you and the provider. There is nothing left to pay.',
+        link: orderLink,
+      }
     case 'cancelled':
       return {
         title: 'This order was cancelled',
         body: 'Nothing was charged. Post a new request or accept another offer to start again.',
-      }
-    case 'refunded':
-    case 'partially_resolved':
-      return {
-        title: 'This order has been resolved',
-        body: 'The escrow balance was already returned. There is nothing left to pay.',
-      }
-    default:
-      return {
-        title: 'This order is already funded',
-        body: 'The amount is held in escrow. Track the delivery on the order page.',
+        link: { to: { name: 'request-new' }, label: 'Post a new request' },
       }
   }
+  return null
 })
 
 const pay = useMutation({
@@ -108,9 +152,7 @@ function submit() {
   />
 
   <EmptyState v-else-if="blockedState" :title="blockedState.title" :body="blockedState.body">
-    <Button variant="secondary" :to="{ name: 'order-detail', params: { id: props.id } }">
-      View the order
-    </Button>
+    <Button variant="secondary" :to="blockedState.link.to">{{ blockedState.link.label }}</Button>
   </EmptyState>
 
   <form v-else-if="order" novalidate @submit.prevent="submit">

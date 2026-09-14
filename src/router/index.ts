@@ -24,18 +24,18 @@ const routes: RouteRecordRaw[] = [
     path: '/',
     component: () => import('@/components/layout/SiteShell.vue'),
     children: [
-      { path: '', name: 'home', component: () => import('@/views/public/HomeView.vue') },
+      { path: '', name: 'home', component: () => import('@/views/public/HomeView.vue'), meta: { title: 'Expert-written material, on request' } },
       { path: 'requests', name: 'browse', component: () => import('@/views/BrowseView.vue'), meta: { title: 'Open requests' } },
       { path: 'requests/new', name: 'request-new', component: () => import('@/views/CreateRequestView.vue'), meta: { title: 'New request' } },
-      { path: 'requests/:id', name: 'request-detail', component: () => import('@/views/RequestDetailView.vue'), props: true },
+      { path: 'requests/:id', name: 'request-detail', component: () => import('@/views/RequestDetailView.vue'), props: true, meta: { title: 'Request' } },
       { path: 'requests/:id/offer', name: 'submit-offer', component: () => import('@/views/SubmitOfferView.vue'), props: true, meta: { title: 'Submit an offer' } },
       { path: 'experts', name: 'experts', component: () => import('@/views/public/ExpertsView.vue'), meta: { title: 'Experts' } },
-      { path: 'experts/:id', name: 'expert-detail', component: () => import('@/views/public/ExpertProfileView.vue'), props: true },
+      { path: 'experts/:id', name: 'expert-detail', component: () => import('@/views/public/ExpertProfileView.vue'), props: true, meta: { title: 'Expert' } },
       { path: 'how-it-works', name: 'how-it-works', component: () => import('@/views/public/HowItWorksView.vue'), meta: { title: 'How it works' } },
 
       // ---- signed-in application ----
       { path: 'app', name: 'dashboard', component: () => import('@/views/DashboardView.vue'), meta: { auth: true, title: 'Your workspace' } },
-      { path: 'app/orders/:id', name: 'order-detail', component: () => import('@/views/OrderStatusView.vue'), props: true, meta: { auth: true } },
+      { path: 'app/orders/:id', name: 'order-detail', component: () => import('@/views/OrderStatusView.vue'), props: true, meta: { auth: true, title: 'Order' } },
       { path: 'app/orders/:id/pay', name: 'checkout', component: () => import('@/views/CheckoutView.vue'), props: true, meta: { auth: true, title: 'Confirm and pay' } },
       { path: 'app/orders/:id/review', name: 'review', component: () => import('@/views/ReviewView.vue'), props: true, meta: { auth: true, title: 'Rate this delivery' } },
       { path: 'app/offers', name: 'my-offers', component: () => import('@/views/MyOffersView.vue'), meta: { auth: true, provider: true, title: 'My offers' } },
@@ -54,7 +54,7 @@ const routes: RouteRecordRaw[] = [
   { path: '/app/requests/:id', redirect: (to) => ({ name: 'request-detail', params: to.params }) },
   { path: '/app/requests/:id/offer', redirect: (to) => ({ name: 'submit-offer', params: to.params }) },
 
-  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue'), meta: { bare: true } },
+  { path: '/:pathMatch(.*)*', name: 'not-found', component: () => import('@/views/NotFoundView.vue'), meta: { title: 'Page not found', bare: true } },
 ]
 
 export const router = createRouter({
@@ -78,6 +78,24 @@ router.beforeEach((to) => {
   return true
 })
 
+const SITE_NAME = 'Sabil Books'
+
+/**
+ * Name the tab after the entity on screen. Two money screens — the offer
+ * comparison and the escrow status — are distinguished only by which order or
+ * request they are about, and the router cannot know that name before the view
+ * has fetched it. Detail views call this once their entity resolves:
+ *
+ *   setDocumentTitle(request.value.title)
+ *
+ * `afterEach` always writes a generic title first, so a stale name from the
+ * previous screen can never survive a navigation.
+ */
+export function setDocumentTitle(text: string) {
+  const trimmed = text.trim()
+  document.title = trimmed ? `${trimmed} · ${SITE_NAME}` : SITE_NAME
+}
+
 router.afterEach((to) => {
-  document.title = to.meta.title ? `${to.meta.title} · Sabil Books` : 'Sabil Books — expert-written material, on request'
+  setDocumentTitle(to.meta.title ?? 'Expert-written material, on request')
 })

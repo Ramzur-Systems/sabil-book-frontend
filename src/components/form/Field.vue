@@ -32,7 +32,8 @@ const describedBy = computed(() => {
     </label>
     <slot :id="controlId" :described-by="describedBy" :invalid="Boolean(error)" />
     <p v-if="hint && !error" :id="`${controlId}-hint`" class="sb-field__hint">{{ hint }}</p>
-    <p v-if="error" :id="`${controlId}-error`" class="sb-field__error">{{ error }}</p>
+    <!-- role="alert" so an error that appears after a failed submit is announced. -->
+    <p v-if="error" :id="`${controlId}-error`" class="sb-field__error" role="alert">{{ error }}</p>
   </div>
 </template>
 

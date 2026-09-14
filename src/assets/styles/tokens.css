@@ -14,9 +14,23 @@
   --paper-tint: #fbfaf5;
   --brass: #9c7a3c;
   --brass-bg: #f1e6d1;
+  /*
+   * Brass as TEXT. The display value (#9c7a3c) measures only 3.23:1 on
+   * --brass-bg, and the 3:1 large-text allowance starts at 18px regular /
+   * 14px bold — badges and pills are 12–13px, so they need the full 4.5:1.
+   * This darkened brass measures 4.91:1 on --brass-bg, 6.02:1 on --paper,
+   * 5.52:1 on --parchment. Use it for every brass glyph, label and numeral.
+   */
+  --brass-text: #7a5e28;
   --slate: #5b6472;
   --slate-bg: #e9e7de;
   --line: #ddd6c7;
+  /*
+   * Borders that identify a CONTROL (inputs, selects, textareas) must hit
+   * 3:1 per WCAG 1.4.11. --line is 1.43:1 on --paper — fine for a decorative
+   * structural hairline, not enough to mark a form field. 3.71:1 on --paper.
+   */
+  --line-control: #8f8368;
   --green: #2f6b4f;
   --green-bg: #e3eee7;
   --red: #a23b32;
@@ -29,7 +43,8 @@
   /* Text, icons and hairlines on the dark surfaces (--ink topbar, --marine buttons). */
   --on-dark: #ffffff;
   --on-dark-muted: color-mix(in srgb, var(--topnav) 70%, transparent);
-  --line-on-dark: color-mix(in srgb, var(--on-dark) 30%, transparent);
+  /* 40%, not 30%: at 30% this was 2.66:1 on --ink, under the 1.4.11 floor. */
+  --line-on-dark: color-mix(in srgb, var(--on-dark) 40%, transparent);
 
   /* Modal scrim. One value for every native <dialog> in the product. */
   --backdrop: color-mix(in srgb, var(--ink) 45%, transparent);
@@ -40,6 +55,8 @@
 
   /* Radius — interactive controls only. Structural rows stay square. */
   --radius-control: 4px;
+  /* The focus ring's own corner, kept a token so no raw radius escapes. */
+  --radius-focus: 2px;
 
   /* Motion */
   --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);

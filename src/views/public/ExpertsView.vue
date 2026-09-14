@@ -255,7 +255,7 @@ function clearFilter() {
 
 .expert__rating {
   font-size: 13px;
-  color: var(--brass);
+  color: var(--brass-text);
   font-variant-numeric: tabular-nums;
 }
 

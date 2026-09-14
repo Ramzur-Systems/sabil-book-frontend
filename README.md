@@ -32,6 +32,7 @@ npm run build       # typecheck + production bundle
 npm run preview     # serve the built bundle
 npm run shots       # visual + responsive smoke test (dev server must be running)
 npm run flow        # end-to-end guest → sign-in → auto-submit walk
+npm run contrast    # WCAG AA contrast guard over tokens.css (exits non-zero on failure)
 ```
 
 `npm run shots` walks every public and member route at 1280px and 375px in headless Chromium
@@ -111,3 +112,41 @@ turning marine is how selection is expressed. Square corners on structure, 4px o
 controls. Source Serif 4 is reserved for human writing (request titles, offer pitches, screen
 titles); IBM Plex Sans carries all UI chrome. Motion is quiet and functional, and every transition
 has a `prefers-reduced-motion` alternative.
+
+
+## Deploying to Vercel
+
+The repo carries a `vercel.json`: Vite framework preset, `dist` output, an SPA rewrite so deep
+links resolve, long-cache headers on hashed assets, and `no-store` on the mock service worker.
+Import the repo in Vercel and it builds with no further configuration.
+
+**The deployed build runs on the mock API, on purpose.** The marketplace endpoints in
+`FRONTEND_SPEC.md` §3 do not exist server-side yet (see the note below), so `.env.production` sets
+`VITE_USE_MOCKS=true` and MSW intercepts every request in the browser. Consequences worth knowing:
+
+- Data is seeded per page load. **Anything a visitor creates disappears on refresh** — the fixture
+  store is module state, not a database. It is a demo, not a staging environment.
+- Any email with a 4+ character password signs in, as the seeded user who is both customer and
+  provider, so both journeys are reachable.
+- MSW ships as its own ~314 kB chunk (~103 kB gzip), loaded only because mocks are on. Setting
+  `VITE_USE_MOCKS=false` drops it from the payload entirely — the import is dynamic.
+
+To point a deployment at a real backend, set these in the Vercel project's Environment Variables
+(they override `.env.production`):
+
+```
+VITE_USE_MOCKS=false
+VITE_API_BASE_URL=https://<your-api-host>/api
+```
+
+### Backend conformance warning
+
+`FRONTEND_SPEC.md` §4 states its enums are "the backend's source of truth". As of this build they
+are not: the Django models in `../backend` disagree on nearly every value — `RequestStatus` and
+`OrderStatus` share only `draft`/`cancelled` and `funded` respectively — and the `Request` model
+has no `title`, `description` or `deadline`, `Offer` has no `message` (the provider's pitch) or
+`delivery_days`, and categories are a fixed six-value enum with no `Category` model. The
+`Sabil_Books_Technical_Specification.docx` that §4 cites is not in the repo.
+
+Nothing is wrong with the frontend here — it implements the spec it was given — but do not attempt
+integration before deciding which document is authoritative.

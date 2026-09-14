@@ -17,6 +17,7 @@ import {
 } from '@/api/orders'
 import { getRequest, listCategories } from '@/api/requests'
 import { queryKeys } from '@/api/queryKeys'
+import { setDocumentTitle } from '@/router'
 import FileCard from '@/components/marketplace/FileCard.vue'
 import OrderStepper from '@/components/marketplace/OrderStepper.vue'
 import Field from '@/components/form/Field.vue'
@@ -30,6 +31,8 @@ import { useUiStore } from '@/stores/ui'
 import { formatDate } from '@/lib/utils'
 
 const REASON_MIN = 20
+/** Fixed so a failed submit inside the dialog can move focus to the control. */
+const REASON_ID = 'order-reason'
 
 const props = defineProps<{ id: string }>()
 
@@ -73,6 +76,15 @@ const heading = computed(() => {
   const title = current.requestTitle ?? request.value?.title ?? 'Order'
   return current.providerName ? `${title} — order with ${current.providerName}` : title
 })
+
+/* Name the tab after the order — two money screens shared one title (WCAG 2.4.2). */
+watch(
+  heading,
+  (text) => {
+    if (text) setDocumentTitle(text)
+  },
+  { immediate: true },
+)
 
 const attachments = computed(() => order.value?.attachments ?? [])
 
@@ -140,8 +152,20 @@ type ReasonMode = 'correction' | 'dispute'
 const reasonDialog = ref<HTMLDialogElement | null>(null)
 const reasonMode = ref<ReasonMode | null>(null)
 const reason = ref('')
-const reasonError = ref('')
+/** The reason shows its problem once the field has been left, or once submitted. */
+const reasonTouched = ref(false)
+const reasonSubmitted = ref(false)
 let triggerElement: HTMLElement | null = null
+
+const reasonProblem = computed(() =>
+  reason.value.trim().length < REASON_MIN
+    ? `Give at least ${REASON_MIN} characters so the other side knows what to act on.`
+    : '',
+)
+
+const reasonError = computed(() =>
+  reasonTouched.value || reasonSubmitted.value ? reasonProblem.value : '',
+)
 
 const dialogCopy = computed(() =>
   reasonMode.value === 'dispute'
@@ -163,7 +187,8 @@ function openReason(mode: ReasonMode) {
   triggerElement = document.activeElement instanceof HTMLElement ? document.activeElement : null
   reasonMode.value = mode
   reason.value = ''
-  reasonError.value = ''
+  reasonTouched.value = false
+  reasonSubmitted.value = false
   void nextTick(() => reasonDialog.value?.showModal())
 }
 
@@ -174,7 +199,8 @@ function closeReason() {
 function onDialogClose() {
   reasonMode.value = null
   reason.value = ''
-  reasonError.value = ''
+  reasonTouched.value = false
+  reasonSubmitted.value = false
   triggerElement?.focus()
   triggerElement = null
 }
@@ -192,7 +218,10 @@ function invalidateOrder() {
 
 const confirm = useMutation({
   mutationFn: () => acceptDelivery(props.id),
-  onSuccess: () => {
+  onSuccess: (accepted) => {
+    // Seed the cache before navigating: the review screen guards on the order
+    // status, and a stale `delivered` would block the page we just sent them to.
+    queryClient.setQueryData(queryKeys.order(props.id), accepted)
     invalidateOrder()
     ui.notify('Delivery confirmed. The payout has been released.', 'success')
     void router.push({ name: 'review', params: { id: props.id } })
@@ -231,10 +260,11 @@ const reasonPending = computed(() => correct.isPending.value || dispute.isPendin
 function submitReason() {
   const text = reason.value.trim()
   if (text.length < REASON_MIN) {
-    reasonError.value = `Give at least ${REASON_MIN} characters so the other side knows what to act on.`
+    // The trigger button keeps focus otherwise, and nothing is announced.
+    reasonSubmitted.value = true
+    void nextTick(() => document.getElementById(REASON_ID)?.focus())
     return
   }
-  reasonError.value = ''
   if (reasonMode.value === 'dispute') dispute.mutate(text)
   else correct.mutate(text)
 }
@@ -327,7 +357,7 @@ watch(
       <h2 id="sb-reason-title" class="sb-dialog__title">{{ dialogCopy.title }}</h2>
       <p class="sb-dialog__body">{{ dialogCopy.body }}</p>
 
-      <Field :label="dialogCopy.label" required :error="reasonError">
+      <Field :label="dialogCopy.label" required :for-id="REASON_ID" :error="reasonError">
         <template #default="{ id, describedBy, invalid }">
           <textarea
             :id="id"
@@ -335,6 +365,7 @@ watch(
             class="sb-control"
             :aria-describedby="describedBy"
             :aria-invalid="invalid || undefined"
+            @blur="reasonTouched = true"
           />
         </template>
       </Field>

@@ -1,9 +1,30 @@
 <script setup lang="ts">
+import { reactive } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUiStore } from '@/stores/ui'
 
 const ui = useUiStore()
 const { toasts } = storeToRefs(ui)
+
+/**
+ * A toast's countdown is held while the pointer is over it OR focus is inside
+ * it. Tracking the two independently means leaving with the mouse does not
+ * restart the clock on a toast the keyboard is still sitting in.
+ */
+const hovered = reactive(new Set<number>())
+const focused = reactive(new Set<number>())
+
+function sync(id: number) {
+  if (hovered.has(id) || focused.has(id)) ui.pause(id)
+  else ui.resume(id)
+}
+
+function hold(id: number, which: 'hover' | 'focus', on: boolean) {
+  const set = which === 'hover' ? hovered : focused
+  if (on) set.add(id)
+  else set.delete(id)
+  sync(id)
+}
 </script>
 
 <template>
@@ -14,6 +35,10 @@ const { toasts } = storeToRefs(ui)
         :key="toast.id"
         class="sb-toast"
         :class="`sb-toast--${toast.tone}`"
+        @mouseenter="hold(toast.id, 'hover', true)"
+        @mouseleave="hold(toast.id, 'hover', false)"
+        @focusin="hold(toast.id, 'focus', true)"
+        @focusout="hold(toast.id, 'focus', false)"
       >
         <span>{{ toast.message }}</span>
         <button type="button" class="sb-toast__close" aria-label="Dismiss" @click="ui.dismiss(toast.id)">

@@ -12,6 +12,7 @@ import { getRequest, listCategories, listRequestOffers } from '@/api/requests'
 import { acceptOffer } from '@/api/offers'
 import { ApiError } from '@/api/client'
 import { queryKeys } from '@/api/queryKeys'
+import { setDocumentTitle } from '@/router'
 import OfferLedgerRow from '@/components/marketplace/OfferLedgerRow.vue'
 import Badge from '@/components/ui/Badge.vue'
 import Button from '@/components/ui/Button.vue'
@@ -50,6 +51,15 @@ const {
  * stranger sees the offer count but never the bids; a guest sees the teaser.
  */
 const isOwner = computed(() => request.value?.isMine === true)
+
+/* Name the tab after the request — two money screens shared one title (WCAG 2.4.2). */
+watch(
+  () => request.value?.title,
+  (title) => {
+    if (title) setDocumentTitle(title)
+  },
+  { immediate: true },
+)
 const isGuest = computed(() => !auth.isAuthenticated)
 
 /**
@@ -152,7 +162,11 @@ const accept = useMutation({
   onSuccess: (order) => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.request(props.id) })
     void queryClient.invalidateQueries({ queryKey: queryKeys.requestOffers(props.id) })
-    void queryClient.invalidateQueries({ queryKey: queryKeys.requests({ mine: true }) })
+    // Accepting closes the request, so every list that could show it goes —
+    // ['requests', {}] partial-matches the public browse and home feeds too.
+    void queryClient.invalidateQueries({ queryKey: queryKeys.requests() })
+    // Sibling offers are rejected by the accept, and one of them can be ours.
+    void queryClient.invalidateQueries({ queryKey: queryKeys.myOffers })
     void queryClient.invalidateQueries({ queryKey: queryKeys.orders({ mine: true }) })
     void queryClient.invalidateQueries({ queryKey: queryKeys.order(order.id) })
     ui.notify('Offer accepted. Fund the order to start the work.', 'success')

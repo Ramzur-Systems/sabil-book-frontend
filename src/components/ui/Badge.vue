@@ -13,7 +13,7 @@ defineProps<{ label: string }>()
   padding: 4px 12px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--brass);
+  color: var(--brass-text);
   background: var(--brass-bg);
   border-radius: var(--radius-control);
 }

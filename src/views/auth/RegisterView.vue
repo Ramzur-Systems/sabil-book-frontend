@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Outside SiteShell — same centred, hairline-only layout language as LoginView. */
-import { computed, reactive, ref, useId } from 'vue'
+import { computed, nextTick, reactive, ref, useId } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useMutation } from '@tanstack/vue-query'
 import { z } from 'zod'
@@ -64,9 +64,59 @@ const form = reactive<RegisterFormValues>({
   isProvider: false,
 })
 
-const fieldErrors = ref<FieldErrors>({})
+/** Every field that can carry a validation message; the checkbox cannot. */
+type TouchableField = Exclude<keyof RegisterFormValues, 'isProvider'>
+
+const touched = reactive<Record<TouchableField, boolean>>({
+  fullName: false,
+  email: false,
+  password: false,
+  country: false,
+})
+const submitAttempted = ref(false)
+
+function markTouched(field: TouchableField) {
+  touched[field] = true
+}
+
+/** The full result of the same schema, evaluated live. Rules and messages are unchanged. */
+const allErrors = computed<FieldErrors>(() => {
+  const result = registerSchema.safeParse(form)
+  if (result.success) return {}
+  const next: FieldErrors = {}
+  for (const issue of result.error.issues) {
+    const key = issue.path[0]
+    if (typeof key === 'string' && !(key in next)) {
+      next[key as keyof RegisterFormValues] = issue.message
+    }
+  }
+  return next
+})
+
+/**
+ * A field shows its error once it has been left, or once a submit was
+ * attempted — never while the user is still filling in a field for the first
+ * time.
+ */
+const fieldErrors = computed<FieldErrors>(() => {
+  const visible: FieldErrors = {}
+  for (const key of Object.keys(allErrors.value) as (keyof RegisterFormValues)[]) {
+    if (key === 'isProvider') continue
+    if (submitAttempted.value || touched[key]) visible[key] = allErrors.value[key]
+  }
+  return visible
+})
+
 const errorMessage = ref<string | null>(null)
+const alertEl = ref<HTMLElement | null>(null)
 const providerCheckboxId = useId()
+
+/** A failed registration is announced and focused, so it is discoverable, not only visible. */
+async function surfaceError(message: string) {
+  errorMessage.value = message
+  await nextTick()
+  alertEl.value?.focus()
+}
 
 const mutation = useMutation({
   mutationFn: (body: Registration) => register(body),
@@ -80,31 +130,16 @@ const mutation = useMutation({
     void router.push(form.isProvider ? { name: 'provider-onboarding' } : { name: 'dashboard' })
   },
   onError: (error) => {
-    errorMessage.value =
-      error instanceof ApiError ? error.message : 'Something went wrong. Try again.'
+    void surfaceError(
+      error instanceof ApiError ? error.message : 'Something went wrong. Try again.',
+    )
   },
 })
 
-function validate(): boolean {
-  const result = registerSchema.safeParse(form)
-  if (result.success) {
-    fieldErrors.value = {}
-    return true
-  }
-  const next: FieldErrors = {}
-  for (const issue of result.error.issues) {
-    const key = issue.path[0]
-    if (typeof key === 'string' && !(key in next)) {
-      next[key as keyof RegisterFormValues] = issue.message
-    }
-  }
-  fieldErrors.value = next
-  return false
-}
-
 function onSubmit() {
   errorMessage.value = null
-  if (!validate()) return
+  submitAttempted.value = true
+  if (Object.keys(allErrors.value).length > 0) return
   mutation.mutate({
     fullName: form.fullName.trim(),
     email: form.email.trim(),
@@ -123,7 +158,15 @@ function onSubmit() {
 
       <p v-if="intentLine" class="sb-auth__intent">{{ intentLine }}</p>
 
-      <p v-if="errorMessage" class="sb-auth__alert" role="alert">{{ errorMessage }}</p>
+      <p
+        v-if="errorMessage"
+        ref="alertEl"
+        class="sb-auth__alert"
+        role="alert"
+        tabindex="-1"
+      >
+        {{ errorMessage }}
+      </p>
 
       <form novalidate @submit.prevent="onSubmit">
         <Field label="Full name" required :error="fieldErrors.fullName">
@@ -136,6 +179,7 @@ function onSubmit() {
               class="sb-control"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="markTouched('fullName')"
             />
           </template>
         </Field>
@@ -150,6 +194,7 @@ function onSubmit() {
               class="sb-control"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="markTouched('email')"
             />
           </template>
         </Field>
@@ -169,6 +214,7 @@ function onSubmit() {
               class="sb-control"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="markTouched('password')"
             />
           </template>
         </Field>
@@ -183,6 +229,7 @@ function onSubmit() {
               class="sb-control"
               :aria-describedby="describedBy"
               :aria-invalid="invalid || undefined"
+              @blur="markTouched('country')"
             />
           </template>
         </Field>

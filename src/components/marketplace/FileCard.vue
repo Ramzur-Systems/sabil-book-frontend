@@ -91,7 +91,7 @@ const scan = computed(() => props.attachment.avScanStatus)
   height: 36px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--brass);
+  color: var(--brass-text);
   background: var(--brass-bg);
 }
 

@@ -92,6 +92,27 @@ seesLedger ? ok('owner sees the offers ledger') : bad('owner sees the offers led
 seesBrief ? ok('owner sees the full brief') : bad('owner sees the full brief')
 await page.screenshot({ path: `${OUT}/flow-5-owner-detail.png`, fullPage: true })
 
+// 7. In-app navigation must actually render.
+// The screenshot harness only does full page loads, so it cannot see a broken
+// client-side transition — a `<Transition mode="out-in">` around a lazy route
+// component once left <main> empty on every in-app hop while every full load
+// looked perfect. Walk the nav with real clicks.
+for (const href of ['/requests', '/app', '/app/offers', '/app/earnings', '/app/settings', '/app']) {
+  const link = await page.$(`nav a[href="${href}"]`)
+  if (!link) { bad(`nav link ${href} exists`); continue }
+  await link.click()
+  await page.waitForTimeout(1400)
+  const state = await page.evaluate(() => ({
+    path: location.pathname,
+    len: document.querySelector('main')?.innerText.trim().length ?? 0,
+    title: document.title,
+  }))
+  if (state.path !== href) bad(`click ${href} navigated there (got ${state.path})`)
+  else if (state.len < 40) bad(`click ${href} rendered content (main is empty)`)
+  else if (!state.title.includes('Sabil Books')) bad(`click ${href} set a page title`)
+  else ok(`in-app nav to ${href} renders`)
+}
+
 await browser.close()
 if (errors.length) console.log('\nconsole/page errors:\n' + errors.join('\n'))
 console.log(fails.length ? `\n${fails.length} FAILURE(S)` : '\nALL FLOW CHECKS PASSED')

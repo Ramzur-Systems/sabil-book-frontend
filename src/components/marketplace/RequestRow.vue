@@ -19,9 +19,17 @@ const props = withDefaults(
     categoryName?: string
     actionLabel?: string
     to?: RouteLocationRaw
+    /**
+     * Heading level for the title. Defaults to 3 because the home feed sits
+     * under its own <h2> section heading; a screen whose only preceding
+     * heading is the page <h1> must pass 2 so the outline never skips a level.
+     */
+    titleLevel?: 2 | 3 | 4
   }>(),
-  { actionLabel: 'Submit offer' },
+  { actionLabel: 'Submit offer', titleLevel: 3 },
 )
+
+const titleTag = computed(() => `h${props.titleLevel}`)
 
 const emit = defineEmits<{ action: [] }>()
 
@@ -46,10 +54,10 @@ function onAction() {
   <div class="sb-request">
     <div class="sb-request__main">
       <span v-if="categoryName" class="sb-request__cat"><Badge :label="categoryName" /></span>
-      <h3 class="sb-request__title">
+      <component :is="titleTag" class="sb-request__title">
         <RouterLink v-if="to" class="sb-request__link" :to="to">{{ request.title }}</RouterLink>
         <template v-else>{{ request.title }}</template>
-      </h3>
+      </component>
       <div class="sb-request__meta">
         <span>{{ budget }}</span>
         <span>{{ deadline }}</span>

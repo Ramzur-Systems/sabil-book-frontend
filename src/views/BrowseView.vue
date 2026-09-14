@@ -161,13 +161,17 @@ const countLabel = computed(() => {
     </EmptyState>
 
     <template v-else>
-      <p class="browse-count">{{ countLabel }}</p>
+      <!-- The feed swaps silently 300ms after a keystroke and TanStack keeps the
+           previous rows, so SkeletonRows never mounts to announce it. This count
+           is the whole result summary; announced atomically it is the change. -->
+      <p class="browse-count" role="status" aria-atomic="true">{{ countLabel }}</p>
       <div class="browse-feed">
         <RequestRow
           v-for="request in requests"
           :key="request.id"
           :request="request"
           :category-name="categoryNames.get(request.categoryId)"
+          :title-level="2"
           action-label="Submit offer"
           :to="{ name: 'submit-offer', params: { id: request.id } }"
         />

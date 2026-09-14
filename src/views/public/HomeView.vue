@@ -521,7 +521,7 @@ const escrowSteps: EscrowStep[] = [
   gap: 5px;
   align-items: baseline;
   font-weight: 500;
-  color: var(--brass);
+  color: var(--brass-text);
 }
 
 /* No rating is a fact about the account, not a brass credential. */

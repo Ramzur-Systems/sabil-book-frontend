@@ -10,7 +10,8 @@
     "typecheck": "vue-tsc -b --force",
     "format": "prettier --write src",
     "shots": "node scripts/screenshot.mjs",
-    "flow": "node scripts/guest-flow.mjs"
+    "flow": "node scripts/guest-flow.mjs",
+    "contrast": "node scripts/contrast.mjs"
   },
   "dependencies": {
     "@tanstack/vue-query": "^5.62.7",

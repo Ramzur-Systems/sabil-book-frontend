@@ -32,16 +32,35 @@ No colour outside this table may appear in product UI.
 | `--brass-bg` | `#F1E6D1` | Badge / avatar background |
 | `--slate` | `#5B6472` | Secondary text, labels, meta |
 | `--slate-bg` | `#E9E7DE` | Neutral status pill |
-| `--line` | `#DDD6C7` | Every hairline border — warm-toned, never cold gray |
+| `--line` | `#DDD6C7` | Structural hairlines — warm-toned, never cold gray. Not for control borders. |
+| `--line-control` | `#8F8368` | Input / select / textarea boundaries (needs 3:1 per 1.4.11) |
 | `--green` | `#2F6B4F` | Success status, completed stepper dots |
 | `--green-bg` | `#E3EEE7` | Success pill background |
 | `--red` | `#A23B32` | Danger / dispute status, destructive text button |
 | `--red-bg` | `#F5E4E1` | Danger pill background |
 | `--topnav` | `#C9CFD8` | Inactive nav links on the ink topbar |
 
-Contrast notes: `--slate` on `--parchment` ≈ 5.6:1 (AA body, do not lighten). `--brass` on
-`--brass-bg` ≈ 3.3:1 — permitted only at ≥13px weight 500 in pills/badges, never body copy.
-`--marine` on `--paper` ≈ 9.9:1.
+Contrast — measured, not estimated. `npm run contrast` recomputes every pair below from
+`tokens.css` and exits non-zero on any AA failure; run it after touching the palette.
+
+| Pair | Ratio | Floor | Note |
+|---|---|---|---|
+| `--slate` on `--parchment` | 5.44:1 | 4.5 | Secondary text. Do not lighten. |
+| `--slate` on `--paper` | 5.93:1 | 4.5 | Meta, pitch text |
+| `--brass-text` on `--brass-bg` | 4.91:1 | 4.5 | **All** brass text: pills, badges, ratings |
+| `--brass-text` on `--paper` | 6.02:1 | 4.5 | Provider rating |
+| `--marine` on `--paper` | 11.53:1 | 4.5 | Links, secondary buttons |
+| `--ink` on `--parchment` | 14.33:1 | 4.5 | Body |
+| `--line-control` on `--paper` | 3.71:1 | 3.0 | Input boundary (WCAG 1.4.11) |
+
+**`--brass` (#9C7A3C) is a display colour only — never set text in it.** It measures 3.23:1 on
+`--brass-bg`, and the 3:1 large-text allowance starts at 24px regular / 18.66px bold, so a 12–13px
+pill needs the full 4.5:1. An earlier version of this document claimed brass text was acceptable
+"at badge size with weight 500+"; that rule was wrong and every brass glyph now uses
+`--brass-text` (#7A5E28) instead.
+
+**`--line` is a structural hairline only.** At 1.43:1 on `--paper` it cannot be the sole boundary
+of a form control; inputs, selects and textareas use `--line-control`.
 
 ## Typography
 

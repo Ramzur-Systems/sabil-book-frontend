@@ -134,7 +134,7 @@ const accessibleAction = computed(() => `${props.actionLabel} ${providerName.val
 
 .sb-ledger__rating {
   font-size: 13px;
-  color: var(--brass);
+  color: var(--brass-text);
   white-space: nowrap;
 }
 

@@ -7,7 +7,7 @@
  * There is no "hire" here on purpose — the mechanic is reverse: the visitor
  * posts a request and this expert bids on it.
  */
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 
 import Avatar from '@/components/ui/Avatar.vue'
@@ -24,6 +24,7 @@ import { ApiError } from '@/api/client'
 import { getProvider } from '@/api/providers'
 import { listCategories } from '@/api/requests'
 import { queryKeys } from '@/api/queryKeys'
+import { setDocumentTitle } from '@/router'
 
 const props = defineProps<{ id: string }>()
 
@@ -42,6 +43,15 @@ const categoriesQuery = useQuery({
 
 const expert = computed(() => providerQuery.data.value ?? null)
 
+
+/* Name the page after the expert, so this tab is distinguishable (WCAG 2.4.2). */
+watch(
+  () => expert.value?.displayName,
+  (name) => {
+    if (name) setDocumentTitle(name)
+  },
+  { immediate: true },
+)
 /** A wrong or retired id is an empty state with a way back, not an error banner. */
 const isMissing = computed(() => {
   const error = providerQuery.error.value
@@ -180,7 +190,7 @@ const bidLine = computed(() =>
 
 .profile__rating {
   font-size: 13px;
-  color: var(--brass);
+  color: var(--brass-text);
   font-variant-numeric: tabular-nums;
 }
 

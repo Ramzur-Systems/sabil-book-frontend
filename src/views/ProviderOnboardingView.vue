@@ -21,7 +21,6 @@ import { queryKeys } from '@/api/queryKeys'
 import { useAuthStore } from '@/stores/auth'
 import { useUiStore } from '@/stores/ui'
 import type { KycStatus } from '@/types/entities'
-import type { StatusTone } from '@/types/status'
 
 const auth = useAuthStore()
 const ui = useUiStore()
@@ -117,19 +116,6 @@ const kycDisabled = computed(
   () => kycStatus.value === 'pending' || kycStatus.value === 'verified',
 )
 
-const KYC_TONE: Record<KycStatus, StatusTone> = {
-  not_started: 'slate',
-  pending: 'brass',
-  verified: 'green',
-  rejected: 'red',
-}
-const KYC_LABEL: Record<KycStatus, string> = {
-  not_started: 'Not started',
-  pending: 'Pending',
-  verified: 'Verified',
-  rejected: 'Rejected',
-}
-
 const kycMutation = useMutation({
   mutationFn: startKyc,
   onSuccess: (profile) => {
@@ -217,7 +203,9 @@ const kycMutation = useMutation({
           </label>
         </div>
 
-        <p v-if="fieldErrors.categories" class="sb-fieldset__error">{{ fieldErrors.categories }}</p>
+        <p v-if="fieldErrors.categories" class="sb-fieldset__error" role="alert">
+          {{ fieldErrors.categories }}
+        </p>
       </fieldset>
 
       <Field label="Payout method" required :error="fieldErrors.payoutMethod">
@@ -241,11 +229,7 @@ const kycMutation = useMutation({
 
     <SectionHeading>Verification</SectionHeading>
     <div class="sb-kyc">
-      <StatusPill
-        :status="kycStatus"
-        :tone="KYC_TONE[kycStatus]"
-        :label="KYC_LABEL[kycStatus]"
-      />
+      <StatusPill :status="kycStatus" />
       <Button
         variant="secondary"
         :disabled="kycDisabled"

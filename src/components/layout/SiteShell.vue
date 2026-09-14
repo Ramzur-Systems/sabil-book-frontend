@@ -4,7 +4,7 @@
  * chrome and the same content column — only the nav differs. Two shells would
  * mean two places for the topbar to drift.
  */
-import { computed, ref, watch } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 
@@ -12,6 +12,9 @@ const auth = useAuthStore()
 const route = useRoute()
 const router = useRouter()
 const menuOpen = ref(false)
+const mainEl = ref<HTMLElement | null>(null)
+const navEl = ref<HTMLElement | null>(null)
+const toggleEl = ref<HTMLButtonElement | null>(null)
 
 interface NavLink {
   to: { name: string }
@@ -41,6 +44,41 @@ const homeTarget = computed(() => (auth.isAuthenticated ? { name: 'dashboard' } 
 /** Close the mobile menu on navigation, so a tap never leaves it hanging open. */
 watch(() => route.fullPath, () => { menuOpen.value = false })
 
+/**
+ * A client-side route change is silent: the page never reloads, so assistive
+ * technology is told nothing. Moving focus to <main> after every in-app
+ * navigation announces the new screen and puts the next Tab at the top of the
+ * content, which is also what the skip link relies on. The first load is left
+ * alone — the browser already announces a fresh document, and stealing focus
+ * there would fight the user's own starting position.
+ */
+watch(
+  () => route.path,
+  () => {
+    // Not `immediate` on purpose: the watcher is registered during the first
+    // render, so it only ever fires on a subsequent in-app navigation.
+    void nextTick(() => mainEl.value?.focus())
+  },
+)
+
+/**
+ * Disclosure, not a modal: Escape closes it and focus moves to the first item
+ * on open, but focus is never trapped and the page behind stays reachable.
+ */
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value
+  if (!menuOpen.value) return
+  void nextTick(() => {
+    navEl.value?.querySelector<HTMLElement>('a, button')?.focus()
+  })
+}
+
+function onMenuKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape' || !menuOpen.value) return
+  menuOpen.value = false
+  toggleEl.value?.focus()
+}
+
 function signOut() {
   auth.clear()
   void router.push({ name: 'home' })
@@ -50,21 +88,22 @@ function signOut() {
 <template>
   <a class="sb-skip" href="#main">Skip to content</a>
 
-  <header class="sb-topbar">
+  <header class="sb-topbar" @keydown="onMenuKeydown">
     <div class="sb-topbar__inner">
       <RouterLink :to="homeTarget" class="sb-wordmark">Sabil Books</RouterLink>
 
       <button
+        ref="toggleEl"
         type="button"
         class="sb-topbar__toggle"
         :aria-expanded="menuOpen"
         aria-controls="sb-nav"
-        @click="menuOpen = !menuOpen"
+        @click="toggleMenu"
       >
         {{ menuOpen ? 'Close' : 'Menu' }}
       </button>
 
-      <nav id="sb-nav" class="sb-nav" :class="{ 'is-open': menuOpen }" aria-label="Main">
+      <nav ref="navEl" id="sb-nav" class="sb-nav" :class="{ 'is-open': menuOpen }" aria-label="Main">
         <RouterLink v-for="link in links" :key="link.label" :to="link.to" class="sb-nav__link">
           {{ link.label }}
         </RouterLink>
@@ -80,12 +119,16 @@ function signOut() {
     </div>
   </header>
 
-  <main id="main" class="sb-wrap">
-    <RouterView v-slot="{ Component }">
-      <Transition name="sb-page" mode="out-in">
-        <component :is="Component" :key="route.fullPath" />
-      </Transition>
-    </RouterView>
+  <main id="main" ref="mainEl" class="sb-wrap" tabindex="-1">
+    <!--
+      No page transition here, deliberately. `<Transition mode="out-in">` around
+      a lazy route component drops the enter side whenever the chunk has not
+      resolved by the time the leave finishes, leaving <main> empty — it was
+      doing exactly that on every in-app navigation. A crossfade is also the
+      wrong instinct for product UI: users are navigating into a task, not
+      watching the page arrive.
+    -->
+    <RouterView />
   </main>
 
   <footer class="sb-footer">
@@ -199,6 +242,17 @@ function signOut() {
   background: var(--on-dark);
 }
 
+/*
+ * `tabindex="-1"` makes <main> a programmatic focus target for the skip link
+ * and for the post-navigation focus move. It is not an interactive control, so
+ * it gets no ring — this suppression is scoped to this element alone and the
+ * global :focus-visible treatment on real controls is untouched.
+ */
+.sb-wrap:focus,
+.sb-wrap:focus-visible {
+  outline: none;
+}
+
 .sb-wrap {
   max-width: 960px;
   padding: 0 32px 96px;
@@ -243,15 +297,6 @@ function signOut() {
   color: var(--marine);
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-
-.sb-page-enter-active,
-.sb-page-leave-active {
-  transition: opacity var(--dur-base) var(--ease-out-quart);
-}
-.sb-page-enter-from,
-.sb-page-leave-to {
-  opacity: 0;
 }
 
 @media (max-width: 800px) {

@@ -34,7 +34,7 @@ const resolvedLabel = computed(() => props.label ?? labelFor(props.status))
 }
 
 .sb-status--brass {
-  color: var(--brass);
+  color: var(--brass-text);
   background: var(--brass-bg);
 }
 .sb-status--green {

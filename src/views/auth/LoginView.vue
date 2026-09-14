@@ -3,7 +3,7 @@
  * Outside SiteShell — a customer or provider lands here signed out, so there is
  * no nav to lean on. Centred single column, hairlines only, no card.
  */
-import { computed, reactive, ref } from 'vue'
+import { computed, nextTick, reactive, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useMutation } from '@tanstack/vue-query'
 
@@ -38,6 +38,14 @@ const intentLine = computed(() => {
 
 const form = reactive({ email: '', password: '' })
 const errorMessage = ref<string | null>(null)
+const alertEl = ref<HTMLElement | null>(null)
+
+/** A failed sign-in is announced and focused, so it is discoverable, not only visible. */
+async function surfaceError(message: string) {
+  errorMessage.value = message
+  await nextTick()
+  alertEl.value?.focus()
+}
 
 const mutation = useMutation({
   mutationFn: (credentials: Credentials) => login(credentials),
@@ -46,8 +54,9 @@ const mutation = useMutation({
     void router.push(resolveNext())
   },
   onError: (error) => {
-    errorMessage.value =
-      error instanceof ApiError ? error.message : 'Something went wrong. Try again.'
+    void surfaceError(
+      error instanceof ApiError ? error.message : 'Something went wrong. Try again.',
+    )
   },
 })
 
@@ -77,7 +86,15 @@ function onSubmit() {
 
       <p v-if="intentLine" class="sb-auth__intent">{{ intentLine }}</p>
 
-      <p v-if="errorMessage" class="sb-auth__alert" role="alert">{{ errorMessage }}</p>
+      <p
+        v-if="errorMessage"
+        ref="alertEl"
+        class="sb-auth__alert"
+        role="alert"
+        tabindex="-1"
+      >
+        {{ errorMessage }}
+      </p>
 
       <form novalidate @submit.prevent="onSubmit">
         <Field label="Email" required>
