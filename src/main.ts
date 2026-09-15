@@ -38,15 +38,30 @@ const queryOptions: VueQueryPluginOptions = {
  * http(s) origin means someone has wired a real API, so mocks stay off even
  * with the flag unset. Nothing silently intercepts a configured backend.
  */
-function shouldUseMocks(): boolean {
+function mockDecision(): { on: boolean; why: string } {
   const flag = import.meta.env.VITE_USE_MOCKS
-  if (flag === 'true') return true
-  if (flag === 'false') return false
-  return !/^https?:\/\//i.test(import.meta.env.VITE_API_BASE_URL ?? '')
+  const base = import.meta.env.VITE_API_BASE_URL ?? ''
+  if (flag === 'true') return { on: true, why: 'VITE_USE_MOCKS=true' }
+  if (flag === 'false') return { on: false, why: 'VITE_USE_MOCKS=false' }
+  if (/^https?:\/\//i.test(base)) {
+    return {
+      on: false,
+      why: `VITE_USE_MOCKS is unset and VITE_API_BASE_URL points at a real host (${base}), so the app is talking to that backend. Set VITE_USE_MOCKS=true to force the mock API instead.`,
+    }
+  }
+  return { on: true, why: 'VITE_USE_MOCKS is unset and no absolute API host is configured' }
 }
 
 async function bootstrap() {
-  if (shouldUseMocks()) {
+  const mocks = mockDecision()
+  // Always say which data source was chosen and why. A silent choice here once
+  // cost a deploy's worth of debugging: the app looked broken when it was in
+  // fact faithfully calling a backend host that did not resolve.
+  console.info(
+    `[sabil] data source: ${mocks.on ? 'MOCK API (MSW)' : `live API at ${import.meta.env.VITE_API_BASE_URL}`} — ${mocks.why}`,
+  )
+
+  if (mocks.on) {
     const { startMockServer } = await import('./mocks/browser')
     await startMockServer()
   }
