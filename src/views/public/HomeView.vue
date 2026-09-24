@@ -249,7 +249,7 @@ const escrowSteps: EscrowStep[] = [
         title="No experts have been listed yet"
         body="Providers are verified before they can be paid, so the roster grows slowly and on purpose. If you sell written work, you can be on it."
       >
-        <Button variant="secondary" :to="{ name: 'register' }">Create an account</Button>
+        <Button variant="secondary" :to="{ name: 'register' }"> Sign up </Button>
       </EmptyState>
 
       <template v-else>
@@ -303,6 +303,24 @@ const escrowSteps: EscrowStep[] = [
 }
 
 /* ---------------------------------------------------------------- opening */
+
+.home-open {
+  position: relative;
+  margin-top: -64px;
+  padding-block: 96px 64px;
+  margin-inline: calc(50% - 50vw);
+  padding-inline: calc(50vw - 50% + 0px);
+  background-color: var(--parchment);
+  background-image:
+    linear-gradient(to right,
+      var(--parchment) calc(50% + 140px),
+    rgb(247 244 236 / 0) calc(50% + 360px)),
+    url('@/assets/images/home-hero.webp');
+  background-position: center, right top;
+  background-size: cover, cover;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid var(--rule)
+}
 
 .home-title {
   max-width: 22ch;
@@ -554,6 +572,14 @@ const escrowSteps: EscrowStep[] = [
 /* ------------------------------------------------------------ responsive */
 
 @media (max-width: 640px) {
+  .home-open {
+    padding: 36px 16px 32px;
+    margin: 0 -16px;
+    background-image:
+      linear-gradient(var(--parchment) 0%, rgb(247 244 236 / 0.85) 100%),
+      url('@/assets/images/home-hero.webp');
+    background-position: center, 70% center;
+  }
   .home-title {
     max-width: none;
     letter-spacing: -0.2px;

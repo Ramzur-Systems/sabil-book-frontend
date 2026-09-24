@@ -113,7 +113,7 @@ function signOut() {
         </template>
         <template v-else>
           <RouterLink :to="{ name: 'login' }" class="sb-nav__link">Sign in</RouterLink>
-          <RouterLink :to="{ name: 'register' }" class="sb-nav__cta">Create an account</RouterLink>
+          <RouterLink :to="{ name: 'register' }" class="sb-nav__cta">Sign up</RouterLink>
         </template>
       </nav>
     </div>
@@ -138,7 +138,7 @@ function signOut() {
         <RouterLink :to="{ name: 'browse' }">Open requests</RouterLink>
         <RouterLink :to="{ name: 'experts' }">Experts</RouterLink>
         <RouterLink :to="{ name: 'how-it-works' }">How it works</RouterLink>
-        <RouterLink v-if="!auth.isAuthenticated" :to="{ name: 'register' }">Create an account</RouterLink>
+        <RouterLink v-if="!auth.isAuthenticated" :to="{ name: 'register' }">Sign up</RouterLink>
       </nav>
     </div>
   </footer>
