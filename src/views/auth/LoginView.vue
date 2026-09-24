@@ -81,7 +81,9 @@ function onSubmit() {
 <template>
   <div class="sb-auth">
     <div class="sb-auth__column">
-      <RouterLink to="/" class="sb-auth__wordmark">Sabil Books</RouterLink>
+      <RouterLink to="/" class="sb-auth__wordmark">
+        <img src="@/assets/images/logo-inline.png" alt="Sabil Qalam" class="sb-auth__logo" />
+      </RouterLink>
       <h1 class="sb-auth__title">Sign in</h1>
 
       <p v-if="intentLine" class="sb-auth__intent">{{ intentLine }}</p>
@@ -154,13 +156,14 @@ function onSubmit() {
 
 .sb-auth__wordmark {
   display: block;
-  margin-bottom: 40px;
-  font-family: var(--font-serif);
-  font-size: 22px;
-  font-weight: 600;
-  color: var(--ink);
-  text-align: center;
-  text-decoration: none;
+  width: fit-content;
+  margin: 0 auto 40px;
+}
+
+.sb-auth__logo {
+  display: block;
+  width: 240px;
+  height: auto;
 }
 
 .sb-auth__title {
