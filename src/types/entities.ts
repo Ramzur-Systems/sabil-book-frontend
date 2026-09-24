@@ -84,6 +84,15 @@ export interface RequestT {
   status: RequestStatus
   offerCount: number
   createdAt: string
+  /** Reference photos the customer attached to the brief. Public, like the preview. */
+  images: RequestImage[]
+}
+
+export interface RequestImage {
+  id: string
+  url: string
+  /** Written by the customer; read out in place of the photo. */
+  alt: string
 }
 
 export interface Offer {

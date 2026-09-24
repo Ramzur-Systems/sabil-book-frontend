@@ -21,6 +21,7 @@ import type {
   Offer,
   OrderT,
   ProviderProfile,
+  RequestImage,
   RequestT,
   Review,
   User,
@@ -125,17 +126,27 @@ type RequestSeed = Omit<
   | 'descriptionPreview'
   | 'descriptionTruncated'
   | 'isMine'
+  | 'images'
 > & {
   currency?: string
   createdAt?: string
   description: string
+  images?: RequestImage[]
 }
+
+/** Placeholder photos: a fixed seed returns the same picture on every load. */
+const photo = (seed: string, alt: string): RequestImage => ({
+  id: `img-${seed}`,
+  url: `https://picsum.photos/seed/sabil-${seed}/1200/900`,
+  alt,
+})
 
 function request(seed: RequestSeed, ownerId: string): RequestT {
   const { description, ...rest } = seed
   const full: RequestT = {
     currency: 'USD',
     createdAt: iso(-7 * DAY),
+    images: [],
     ...rest,
     // Both fields are filled per-viewer by the handler's projection.
     description: null,
@@ -163,6 +174,10 @@ export const requests: RequestT[] = [
       status: 'published',
       offerCount: 3,
       createdAt: iso(-6 * DAY),
+      images: [
+        photo('observability-1', 'Current monitoring dashboard showing pipeline freshness alerts'),
+        photo('observability-2', 'Whiteboard sketch of our data stack and where each tool would sit'),
+      ],
     },
     CURRENT_USER_ID,
   ),
@@ -179,6 +194,7 @@ export const requests: RequestT[] = [
       status: 'published',
       offerCount: 0,
       createdAt: iso(-3 * DAY),
+      images: [photo('vendor-sop-1', 'The paper onboarding checklist the team uses today')],
     },
     CURRENT_USER_ID,
   ),
@@ -212,6 +228,7 @@ export const requests: RequestT[] = [
       status: 'published',
       offerCount: 2,
       createdAt: iso(-6 * DAY),
+      images: [photo('okr-1', 'Last quarter’s OKR board, for the format we are used to')],
     },
     'usr-aliya',
   ),
@@ -228,6 +245,11 @@ export const requests: RequestT[] = [
       status: 'published',
       offerCount: 1,
       createdAt: iso(-1 * DAY),
+      images: [
+        photo('intake-1', 'Warehouse loading bay where supplier deliveries arrive'),
+        photo('intake-2', 'Current supplier form, page one'),
+        photo('intake-3', 'Current supplier form, page two'),
+      ],
     },
     'usr-bekzat',
   ),

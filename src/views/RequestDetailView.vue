@@ -216,6 +216,14 @@ watch(
       <p v-if="request.description" class="sb-request__description">{{ request.description }}</p>
       <p v-else class="sb-request__description">{{ request.descriptionPreview }}</p>
 
+      <ul v-if="request.images.length" class="sb-photos" aria-label="Photos attached to the request">
+        <li v-for="image in request.images" :key="image.id">
+          <a :href="image.url" target="_blank" rel="noopener" class="sb-photos__link">
+            <img :src="image.url" :alt="image.alt" class="sb-photos__img" loading="lazy" />
+          </a>
+        </li>
+      </ul>
+
       <!-- Guest: the brief is a teaser. Say so in plain words, don't fake a paywall. -->
       <div v-if="isGuest" class="sb-gate">
         <p v-if="request.descriptionTruncated" class="sb-gate__body">
@@ -333,6 +341,33 @@ watch(
   font-size: 15px;
   color: var(--slate);
   white-space: pre-wrap;
+}
+
+.sb-photos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+  max-width: 640px;
+  padding: 0;
+  margin: 24px 0 8px;
+  list-style: none;
+}
+
+.sb-photos__link {
+  display: block;
+  border: 1px solid var(--line);
+  transition: border-color var(--dur-fast) var(--ease-out-quart);
+}
+.sb-photos__link:hover {
+  border-color: var(--line-control);
+}
+
+.sb-photos__img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--slate-bg);
 }
 
 .sb-gate {

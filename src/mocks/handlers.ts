@@ -205,6 +205,7 @@ export const handlers = [
       descriptionPreview: '',
       descriptionTruncated: false,
       isMine: true,
+      images: [],
     }
     requests.unshift(created)
     requestOwner.set(created.id, CURRENT_USER_ID)
