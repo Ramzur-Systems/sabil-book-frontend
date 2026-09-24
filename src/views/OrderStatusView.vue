@@ -171,7 +171,7 @@ const dialogCopy = computed(() =>
   reasonMode.value === 'dispute'
     ? {
         title: 'Open a dispute',
-        body: 'A dispute freezes the escrow balance and hands the case to Sabil Books. Set out what went wrong and what you expected instead.',
+        body: 'A dispute freezes the escrow balance and hands the case to Sabil Qalam. Set out what went wrong and what you expected instead.',
         label: 'Why are you disputing this delivery?',
         confirm: 'Open the dispute',
       }

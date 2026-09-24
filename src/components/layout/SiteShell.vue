@@ -90,7 +90,7 @@ function signOut() {
 
   <header class="sb-topbar" @keydown="onMenuKeydown">
     <div class="sb-topbar__inner">
-      <RouterLink :to="homeTarget" class="sb-wordmark">Sabil Books</RouterLink>
+      <RouterLink :to="homeTarget" class="sb-wordmark">Sabil Qalam</RouterLink>
 
       <button
         ref="toggleEl"
@@ -133,7 +133,7 @@ function signOut() {
 
   <footer class="sb-footer">
     <div class="sb-footer__inner">
-      <p class="sb-footer__mark">Sabil Books</p>
+      <p class="sb-footer__mark">Sabil Qalam</p>
       <nav class="sb-footer__nav" aria-label="Footer">
         <RouterLink :to="{ name: 'browse' }">Open requests</RouterLink>
         <RouterLink :to="{ name: 'experts' }">Experts</RouterLink>

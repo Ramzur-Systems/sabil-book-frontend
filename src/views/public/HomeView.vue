@@ -114,7 +114,7 @@ interface EscrowStep {
 const escrowSteps: EscrowStep[] = [
   {
     title: 'You accept an offer and fund it',
-    body: 'The agreed price plus the platform fee leaves your account and is held by Sabil Books. The expert can see the work is funded. They cannot draw on it.',
+    body: 'The agreed price plus the platform fee leaves your account and is held by Sabil Qalam. The expert can see the work is funded. They cannot draw on it.',
   },
   {
     title: 'The expert writes and delivers',
@@ -138,7 +138,7 @@ const escrowSteps: EscrowStep[] = [
         You write down the document you need. Experts bid for the work.
       </h1>
       <p class="home-lede">
-        Sabil Books is a reverse marketplace for written material — research briefs, process
+        Sabil Qalam is a reverse marketplace for written material — research briefs, process
         documents, exam preparation. You post the need and the budget. Subject-matter experts read
         it and send back a price, a delivery date and a short case for themselves. You compare those
         offers side by side, accept one, and the money is held in escrow until the file is in your

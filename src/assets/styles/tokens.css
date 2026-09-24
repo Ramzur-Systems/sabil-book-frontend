@@ -1,5 +1,5 @@
 /*
- * Sabil Books design tokens — canonical source is `sabil_design_v1.html`.
+ * Sabil Qalam design tokens — canonical source is `sabil_design_v1.html`.
  * Mirrored into tailwind.config.ts under theme.extend so plain CSS and
  * Tailwind utilities can never drift. No colour, radius or shadow outside
  * this file may appear in product UI.

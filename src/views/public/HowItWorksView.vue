@@ -89,9 +89,9 @@ const providerSteps: Step[] = [
 <template>
   <section>
     <header class="hiw__intro">
-      <h1 class="hiw__title">How Sabil Books works</h1>
+      <h1 class="hiw__title">How Sabil Qalam works</h1>
       <p class="hiw__lede">
-        Sabil Books runs in reverse to a marketplace of listings: you describe the document you
+        Sabil Qalam runs in reverse to a marketplace of listings: you describe the document you
         need, and experts compete for it with their own prices. Money sits in escrow from the moment
         you fund the order until you accept the delivery. Both sides of that transaction are written
         out below.

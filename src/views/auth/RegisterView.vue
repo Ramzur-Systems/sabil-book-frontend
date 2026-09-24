@@ -239,7 +239,7 @@ function onSubmit() {
         <div class="sb-checkbox-row">
           <input :id="providerCheckboxId" v-model="form.isProvider" type="checkbox" class="sb-checkbox" />
           <label :for="providerCheckboxId" class="sb-checkbox-label">
-            I want to sell my expertise on Sabil Books
+            I want to sell my expertise on Sabil Qalam
           </label>
         </div>
 

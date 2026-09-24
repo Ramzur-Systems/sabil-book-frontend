@@ -78,7 +78,7 @@ router.beforeEach((to) => {
   return true
 })
 
-const SITE_NAME = 'Sabil Books'
+const SITE_NAME = 'Sabil Qalam'
 
 /**
  * Name the tab after the entity on screen. Two money screens — the offer
