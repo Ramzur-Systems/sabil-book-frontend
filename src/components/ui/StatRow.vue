@@ -31,11 +31,9 @@ defineProps<{ stats: Stat[] }>()
 .sb-stat {
   flex: 1;
   min-width: 0;
-  padding: 16px 24px 16px 0;
+  padding: 16px 12px;
+  text-align: center;
   border-right: 1px solid var(--line);
-}
-.sb-stat:first-child {
-  padding-left: 0;
 }
 .sb-stat:last-child {
   border-right: none;
@@ -60,7 +58,7 @@ defineProps<{ stats: Stat[] }>()
   }
   .sb-stat {
     flex: 1 1 50%;
-    padding: 14px 16px 14px 0;
+    padding: 14px 8px;
     border-right: none;
   }
   .sb-stat:nth-child(n + 3) {
