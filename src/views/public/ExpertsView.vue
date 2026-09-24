@@ -160,7 +160,7 @@ function clearFilter() {
       <ul class="experts-list">
         <li v-for="expert in experts" :key="expert.id">
           <RouterLink class="expert" :to="{ name: 'expert-detail', params: { id: expert.id } }">
-            <Avatar :name="expert.displayName" />
+            <Avatar :name="expert.displayName" :src="expert.avatarUrl" />
 
             <div class="expert__main">
               <div class="expert__head">

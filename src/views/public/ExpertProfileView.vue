@@ -113,7 +113,7 @@ const bidLine = computed(() =>
 
     <template v-else-if="expert">
       <header class="profile__head">
-        <Avatar :name="expert.displayName" />
+        <Avatar :name="expert.displayName" :src="expert.avatarUrl" />
         <div class="profile__id">
           <h1 class="profile__name">{{ expert.displayName }}</h1>
           <div class="profile__signals">

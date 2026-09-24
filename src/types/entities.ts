@@ -45,6 +45,8 @@ export interface ProviderProfile {
   /** Omitted on public profiles — the account behind a provider is not public. */
   userId?: string
   displayName: string
+  /** Profile photo. Absent until the provider uploads one; the UI shows initials. */
+  avatarUrl?: string | null
   bio: string
   categories: string[]
   kycStatus: KycStatus

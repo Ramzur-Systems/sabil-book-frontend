@@ -255,7 +255,7 @@ const escrowSteps: EscrowStep[] = [
       <template v-else>
         <ul class="home-roster">
           <li v-for="person in roster" :key="person.id" class="home-person">
-            <Avatar :name="person.displayName" />
+            <Avatar :name="person.displayName" :src="person.avatarUrl" />
 
             <div class="home-person__main">
               <RouterLink

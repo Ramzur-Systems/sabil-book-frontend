@@ -59,7 +59,7 @@ const accessibleAction = computed(() => `${props.actionLabel} ${providerName.val
 
 <template>
   <div class="sb-ledger" :class="{ 'is-selected': selected }">
-    <Avatar :name="providerName" />
+    <Avatar :name="providerName" :src="offer.provider?.avatarUrl" />
 
     <div class="sb-ledger__main">
       <div class="sb-ledger__head">
