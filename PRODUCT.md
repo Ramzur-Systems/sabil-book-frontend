@@ -24,7 +24,7 @@ Both sides use this for money-bearing work with a deadline attached. Nobody is b
 
 ## Product Purpose
 
-Sabil Books is a **reverse marketplace for expert-written material**. The customer posts a
+Sabil Qalam is a **reverse marketplace for expert-written material**. The customer posts a
 request; providers bid; the customer compares offers side by side and accepts one. Money is held
 in escrow from funding through a review window, and released on acceptance.
 

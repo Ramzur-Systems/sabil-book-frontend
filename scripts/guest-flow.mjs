@@ -109,7 +109,7 @@ for (const href of ['/requests', '/app', '/app/offers', '/app/earnings', '/app/s
   }))
   if (state.path !== href) bad(`click ${href} navigated there (got ${state.path})`)
   else if (state.len < 40) bad(`click ${href} rendered content (main is empty)`)
-  else if (!state.title.includes('Sabil Books')) bad(`click ${href} set a page title`)
+  else if (!state.title.includes('Sabil Qalam')) bad(`click ${href} set a page title`)
   else ok(`in-app nav to ${href} renders`)
 }
 

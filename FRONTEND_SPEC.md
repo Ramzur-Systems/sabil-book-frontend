@@ -1,4 +1,4 @@
-# Sabil Books — frontend build spec (v1)
+# Sabil Qalam — frontend build spec (v1)
 
 This is an execution spec, not a design brief. The visual direction is already locked — see
 `sabil_design_v1.html` (10 screens, design tokens, component patterns). Your job here is to turn

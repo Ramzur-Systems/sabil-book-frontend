@@ -1,4 +1,4 @@
-# Sabil Books — frontend
+# Sabil Qalam — frontend
 
 Vue 3 + TypeScript SPA for a reverse marketplace for expert-written material. A customer posts a
 request, providers bid, the customer compares offers side by side and accepts one; money sits in

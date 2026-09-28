@@ -1,6 +1,6 @@
 # Design
 
-Visual system for Sabil Books. Canonical reference: `sabil_design_v1.html`. This document
+Visual system for Sabil Qalam. Canonical reference: `sabil_design_v1.html`. This document
 describes that reference; where they disagree, the HTML wins and this file gets corrected.
 
 ## Theme
@@ -68,7 +68,7 @@ Two families, paired on a real contrast axis (transitional serif + neo-grotesque
 from Google Fonts with `display=swap`.
 
 - **Source Serif 4** — `serif`. Used *only* for human writing and screen titles: request titles,
-  offer pitches (italic 400), the `Sabil Books` wordmark, `h2.screen-title`. Never for nav,
+  offer pitches (italic 400), the `Sabil Qalam` wordmark, `h2.screen-title`. Never for nav,
   buttons, prices, statuses or form fields.
 - **IBM Plex Sans** — everything else. Weights 400 / 500 / 600.
 
