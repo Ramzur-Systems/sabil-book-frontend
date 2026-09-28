@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
-import ToastHost from '@/components/ui/ToastHost.vue'
+import SiteHeader from './components/SiteHeader.vue'
+import SiteFooter from './components/SiteFooter.vue'
 </script>
-
 <template>
-  <RouterView />
-  <ToastHost />
+  <a class="skip" href="#main">Skip to content</a>
+  <SiteHeader />
+  <main id="main"><RouterView /></main>
+  <SiteFooter />
 </template>

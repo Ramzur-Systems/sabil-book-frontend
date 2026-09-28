@@ -1,44 +1,29 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import { VueQueryPlugin, type VueQueryPluginOptions } from '@tanstack/vue-query'
-
+import { VueQueryPlugin, QueryClient } from '@tanstack/vue-query'
 import App from './App.vue'
 import { router } from './router'
-import './assets/styles/main.css'
+import { useSessionStore } from './stores/session'
+import './style.css'
 
-const queryOptions: VueQueryPluginOptions = {
-  queryClientConfig: {
-    defaultOptions: {
-      queries: {
-        staleTime: 30_000,
-        refetchOnWindowFocus: false,
-        retry: (failureCount, error) => {
-          const status = (error as { status?: number }).status
-          if (status && status >= 400 && status < 500) return false
-          return failureCount < 2
-        },
-      },
-    },
-  },
-}
-
-async function bootstrap() {
-  /*
-   * The mock API is gated on VITE_USE_MOCKS alone, NOT on import.meta.env.DEV.
-   * The marketplace endpoints don't exist server-side yet, so the deployed
-   * demo build runs against MSW too — gating on DEV would ship a production
-   * bundle where every request 404s and the app renders empty.
-   *
-   * The import stays dynamic, so when VITE_USE_MOCKS is "false" the mock
-   * module and its fixtures are never fetched and Rollup keeps them in a
-   * separate chunk, out of the main bundle.
-   */
-  if (import.meta.env.VITE_USE_MOCKS === 'true') {
-    const { startMockServer } = await import('./mocks/browser')
-    await startMockServer()
+async function start() {
+  if (import.meta.env.VITE_USE_MOCKS !== 'false') {
+    const { worker } = await import('./mocks/browser')
+    await worker.start({ onUnhandledRequest: 'bypass' })
   }
-
-  createApp(App).use(createPinia()).use(router).use(VueQueryPlugin, queryOptions).mount('#app')
+  const app = createApp(App)
+  const pinia = createPinia()
+  app.use(pinia)
+  app.use(router)
+  app.use(VueQueryPlugin, {
+    queryClient: new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } }),
+  })
+  await useSessionStore(pinia).restore()
+  await router.isReady()
+  app.mount('#app')
 }
-
-void bootstrap()
+start().catch((error: unknown) => {
+  console.error('Sabil Qalam could not start', error)
+  document.querySelector('#app')!.textContent =
+    'Could not start the site. Check the browser console and MSW worker setup.'
+})
