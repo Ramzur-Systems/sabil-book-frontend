@@ -45,6 +45,7 @@ export const requests: MarketplaceRequest[] = [
 export const experts: Expert[] = [
   {
     id: 'aida',
+    userId: 'user-aida',
     name: 'Aida Nurgaliyeva',
     initials: 'AN',
     bio: 'Research writer turning complex findings into clear, decision-ready briefs.',
@@ -72,5 +73,23 @@ export const experts: Expert[] = [
     rating: 'New to Sabil',
     reviews: 0,
     orders: 0,
+  },
+]
+export const posts = [
+  {
+    id: 'aida-research-notes',
+    authorId: 'user-aida',
+    imageUrls: ['/eyebrow-books-warm.png', '/hero-style-01-warm.png'],
+    text: 'A useful research brief starts with a question narrow enough to answer and important enough to matter. I am sharing a few notes from this week’s evidence-mapping work.',
+    createdAt: '2026-10-06T09:30:00.000Z',
+    updatedAt: '2026-10-06T09:30:00.000Z',
+  },
+  {
+    id: 'aida-reading-list',
+    authorId: 'user-aida',
+    imageUrls: ['/mission-sharing-warm.png'],
+    text: 'My current reading list is a reminder that clear writing is collaborative: listen carefully, name your sources, and leave room for the reader to make a decision.',
+    createdAt: '2026-10-02T14:15:00.000Z',
+    updatedAt: '2026-10-02T14:15:00.000Z',
   },
 ]

@@ -69,7 +69,7 @@ async function submit() {
         </div>
       </div>
       <p v-if="isMock" class="small-note mt-3">
-        Demo mode: any email and password with 8+ characters works.
+        Demo mode: any email and password with 8+ characters works. Sign in as aida@sabil.app to explore provider tools.
       </p>
       <BaseButton to="/" variant="text">← Back to home</BaseButton>
     </div>

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { api } from './client'
-import { expertSchema, requestSchema, userSchema } from './types'
-import type { OfferDraft, RequestDraft } from './types'
+import { expertSchema, postSchema, requestSchema, userSchema } from './types'
+import type { OfferDraft, PostDraft, RequestDraft } from './types'
 
 export const marketplace = {
   async requests() {
@@ -15,6 +15,15 @@ export const marketplace = {
   },
   async expert(id: string) {
     return expertSchema.parse(await api<unknown>(`/experts/${encodeURIComponent(id)}/`))
+  },
+  async posts() {
+    return z.array(postSchema).parse(await api<unknown>('/posts/'))
+  },
+  async expertPosts(id: string) {
+    return z.array(postSchema).parse(await api<unknown>(`/experts/${encodeURIComponent(id)}/posts/`))
+  },
+  async createPost(draft: PostDraft) {
+    return postSchema.parse(await api<unknown>('/posts/', { method: 'POST', body: JSON.stringify(draft) }))
   },
   async createRequest(draft: RequestDraft) {
     return requestSchema.parse(

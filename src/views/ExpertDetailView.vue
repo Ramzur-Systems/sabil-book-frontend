@@ -4,12 +4,20 @@ import { useRoute } from 'vue-router'
 import { useQuery } from '@tanstack/vue-query'
 import { marketplace } from '../api/marketplace'
 import BaseButton from '../components/BaseButton.vue'
+import PostCarousel from '../components/PostCarousel.vue'
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const query = useQuery({
   queryKey: computed(() => ['expert', id.value]),
   queryFn: () => marketplace.expert(id.value),
 })
+const postsQuery = useQuery({
+  queryKey: computed(() => ['expert-posts', id.value]),
+  queryFn: () => marketplace.expertPosts(id.value),
+})
+function displayDate(value: string) {
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
+}
 </script>
 <template>
   <div class="page narrow">
@@ -44,7 +52,19 @@ const query = useQuery({
           <p>Publish a clear request so experts can offer an approach and price.</p>
           <BaseButton to="/requests/new">Post a request ↗</BaseButton>
         </aside>
-      </div></template
+      </div>
+      <section class="expert-posts">
+        <div class="eyebrow">From {{ query.data.value.name.split(' ')[0] }}</div>
+        <h2 class="text-3xl">Recent posts</h2>
+        <p v-if="postsQuery.isPending.value" class="loading-state">Loading posts…</p>
+        <p v-else-if="!postsQuery.data.value?.length" class="meta">No posts shared yet.</p>
+        <div v-else class="post-list">
+          <article v-for="post in postsQuery.data.value" :key="post.id" class="post-card">
+            <div class="post-body"><p class="post-meta">{{ displayDate(post.createdAt) }}</p><p class="post-text">{{ post.text }}</p></div>
+            <PostCarousel :images="post.imageUrls" />
+          </article>
+        </div>
+      </section></template
     >
   </div>
 </template>

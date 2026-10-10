@@ -49,6 +49,74 @@ img {
   max-width: 100%;
   display: block;
 }
+.post-list {
+  display: grid;
+  gap: 24px;
+}
+.post-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.post-carousel { position: relative; background: #e6dfd1; }
+.post-image {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  background: #e6dfd1;
+}
+.carousel-control {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: rgb(16 35 56 / 82%);
+  color: #fff;
+  font-size: 1.25rem;
+  line-height: 1;
+  transform: translateY(-50%);
+}
+.carousel-control:hover { background: var(--navy); }
+.carousel-control.previous { left: 14px; }
+.carousel-control.next { right: 14px; }
+.carousel-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  display: flex;
+  gap: 7px;
+  transform: translateX(-50%);
+}
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: transparent;
+}
+.carousel-dot.active { background: #fff; }
+.post-body { padding: 26px; }
+.post-meta { margin-bottom: 12px; font-size: 0.84rem; }
+.post-meta a { color: var(--marine); font-weight: 700; }
+.post-text { color: var(--ink); white-space: pre-wrap; margin: 0; }
+.expert-posts, .my-posts { margin-top: 64px; }
+.profile-summary { display: flex; gap: 22px; align-items: flex-start; max-width: 760px; }
+.profile-summary h2 { font-size: 2rem; margin-bottom: 8px; }
+.section-top.compact { margin-bottom: 24px; }
+.compose-page { max-width: 720px; }
+.post-form { margin-top: 30px; }
+.post-preview { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; margin: 8px 0 24px; }
+.post-preview .post-image { height: 180px; border-radius: 8px; }
+@media (max-width: 620px) {
+  .post-image { height: 220px; }
+  .profile-summary { display: block; }
+  .profile-summary .avatar { margin-bottom: 18px; }
+}
 h1,
 h2,
 h3,

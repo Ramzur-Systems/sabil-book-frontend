@@ -11,6 +11,7 @@ export const requestSchema = z.object({
 })
 export const expertSchema = z.object({
   id: z.string(),
+  userId: z.string().optional(),
   name: z.string(),
   initials: z.string(),
   bio: z.string(),
@@ -19,7 +20,21 @@ export const expertSchema = z.object({
   reviews: z.number(),
   orders: z.number(),
 })
-export const userSchema = z.object({ id: z.string(), name: z.string(), email: z.string() })
+export const userSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string(),
+  isProvider: z.boolean(),
+  providerId: z.string().optional(),
+})
+export const postSchema = z.object({
+  id: z.string(),
+  authorId: z.string(),
+  imageUrls: z.array(z.string()).min(1),
+  text: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+})
 export const requestDraftSchema = z.object({
   category: z.string().min(1, 'Choose a category'),
   title: z.string().trim().min(5, 'Add a descriptive title'),
@@ -32,11 +47,17 @@ export const offerDraftSchema = z.object({
   days: z.coerce.number().int().positive('Enter the delivery time'),
   message: z.string().trim().min(20, 'Explain your approach in at least 20 characters').max(1000),
 })
+export const postDraftSchema = z.object({
+  imageUrls: z.array(z.string()).min(1, 'Choose at least one photo'),
+  text: z.string().trim().min(1, 'Write something to share').max(2_000),
+})
 export type MarketplaceRequest = z.infer<typeof requestSchema>
 export type Expert = z.infer<typeof expertSchema>
 export type User = z.infer<typeof userSchema>
+export type Post = z.infer<typeof postSchema>
 export type RequestDraft = z.infer<typeof requestDraftSchema>
 export type OfferDraft = z.infer<typeof offerDraftSchema>
+export type PostDraft = z.infer<typeof postDraftSchema>
 export const categories = [
   ['Research', 'Briefs, synthesis and evidence-led reports'],
   ['Process documents', 'Guides, playbooks and operating procedures'],
