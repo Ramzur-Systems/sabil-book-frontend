@@ -2337,14 +2337,6 @@ dialog {
 .closing .button:hover {
   background: #0d2f4b;
 }
-.closing-emblem {
-  width: 155px;
-  height: 280px;
-  object-fit: contain;
-  justify-self: center;
-  opacity: 0.76;
-  transform: rotate(8deg);
-}
 @media (max-width: 900px) {
   .mission-inner {
     gap: 4%;
@@ -2391,14 +2383,6 @@ dialog {
   .closing-copy {
     position: relative;
     z-index: 1;
-  }
-  .closing-emblem {
-    position: absolute;
-    right: 1px;
-    bottom: -29px;
-    width: 64px;
-    height: 115px;
-    opacity: 0.55;
   }
 }
 

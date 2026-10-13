@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { onBeforeUnmount, reactive, ref } from 'vue'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 import { useRouter } from 'vue-router'
 import { marketplace } from '../api/marketplace'
@@ -8,21 +8,26 @@ import { useSessionStore } from '../stores/session'
 const session = useSessionStore()
 const router = useRouter()
 const queryClient = useQueryClient()
-const form = reactive({ imageUrls: [] as string[], text: '' })
+const form = reactive({ images: [] as File[], text: '' })
 const error = ref('')
 const fileNames = ref<string[]>([])
+const previewUrls = ref<string[]>([])
+function revokePreviews() {
+  previewUrls.value.forEach((url) => URL.revokeObjectURL(url))
+}
+onBeforeUnmount(revokePreviews)
 const mutation = useMutation({
   mutationFn: marketplace.createPost,
   onSuccess: async () => {
     await queryClient.invalidateQueries({ queryKey: ['posts'] })
-    await queryClient.invalidateQueries({ queryKey: ['expert-posts', session.user?.providerId] })
+    await queryClient.invalidateQueries({ queryKey: ['expert-posts'] })
     await router.push('/app/profile')
   },
   onError: (reason) => {
     error.value = reason instanceof Error ? reason.message : 'Your post could not be published.'
   },
 })
-async function choosePhotos(event: Event) {
+function choosePhotos(event: Event) {
   error.value = ''
   const files = Array.from((event.target as HTMLInputElement).files || [])
   if (!files.length) return
@@ -30,34 +35,29 @@ async function choosePhotos(event: Event) {
     error.value = 'Choose an image file.'
     return
   }
-  try {
-    form.imageUrls = await Promise.all(files.map(readImage))
-    fileNames.value = files.map((file) => file.name)
-  } catch {
-    error.value = 'One or more images could not be read.'
-  }
-}
-function readImage(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result || ''))
-    reader.onerror = () => reject(reader.error)
-    reader.readAsDataURL(file)
-  })
+  revokePreviews()
+  form.images = files
+  previewUrls.value = files.map((file) => URL.createObjectURL(file))
+  fileNames.value = files.map((file) => file.name)
 }
 function submit() {
   error.value = ''
-  if (!form.imageUrls.length || !form.text.trim()) {
+  if (!form.images.length || !form.text.trim()) {
     error.value = 'Add a photo and a short text before publishing.'
     return
   }
-  mutation.mutate({ imageUrls: form.imageUrls, text: form.text })
+  mutation.mutate({ images: form.images, text: form.text })
 }
 </script>
 
 <template>
   <div class="page narrow compose-page">
-    <template v-if="!session.user?.isProvider">
+    <template v-if="!session.signedIn">
+      <div class="eyebrow">Provider tools</div><h1>Sign in to create a post</h1>
+      <p class="page-intro">Sign in with a provider account to share a post with the community.</p>
+      <RouterLink to="/login" class="button">Sign in</RouterLink>
+    </template>
+    <template v-else-if="!session.user?.isProvider">
       <div class="eyebrow">Provider tools</div><h1>Posts are for providers</h1>
       <p class="page-intro">Only approved provider profiles can share a post with the community.</p>
       <RouterLink to="/app/providers/onboarding" class="button">Become a provider</RouterLink>
@@ -78,8 +78,8 @@ function submit() {
           <textarea id="post-text" v-model="form.text" class="input" rows="7" maxlength="2000" placeholder="What would be useful to share?"></textarea>
           <span class="small-note">{{ form.text.length }}/2000</span>
         </div>
-        <div v-if="form.imageUrls.length" class="post-gallery post-preview" :class="`images-${Math.min(form.imageUrls.length, 3)}`">
-          <img v-for="(imageUrl, index) in form.imageUrls" :key="imageUrl" :src="imageUrl" :alt="`Selected photo ${index + 1}`" class="post-image" />
+        <div v-if="previewUrls.length" class="post-preview">
+          <img v-for="(url, index) in previewUrls" :key="url" :src="url" :alt="`Selected photo ${index + 1}`" class="post-image" />
         </div>
         <div class="form-actions"><RouterLink to="/app/profile" class="button outline">Cancel</RouterLink><button class="button" type="submit" :disabled="mutation.isPending.value">{{ mutation.isPending.value ? 'Publishing…' : 'Publish post' }}</button></div>
       </form>

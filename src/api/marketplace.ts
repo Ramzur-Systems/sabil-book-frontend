@@ -23,7 +23,10 @@ export const marketplace = {
     return z.array(postSchema).parse(await api<unknown>(`/experts/${encodeURIComponent(id)}/posts/`))
   },
   async createPost(draft: PostDraft) {
-    return postSchema.parse(await api<unknown>('/posts/', { method: 'POST', body: JSON.stringify(draft) }))
+    const body = new FormData()
+    body.append('text', draft.text)
+    for (const image of draft.images) body.append('images', image)
+    return postSchema.parse(await api<unknown>('/posts/', { method: 'POST', body }))
   },
   async createRequest(draft: RequestDraft) {
     return requestSchema.parse(

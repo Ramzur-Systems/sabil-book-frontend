@@ -3,15 +3,13 @@ import { computed } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import { marketplace } from '../api/marketplace'
 import PostCarousel from '../components/PostCarousel.vue'
+import { displayDate } from '../lib/utils'
 
 const postsQuery = useQuery({ queryKey: ['posts'], queryFn: marketplace.posts })
 const expertsQuery = useQuery({ queryKey: ['experts'], queryFn: marketplace.experts })
 const expertsByUserId = computed(
   () => new Map((expertsQuery.data.value || []).map((expert) => [expert.userId, expert])),
 )
-function displayDate(value: string) {
-  return new Intl.DateTimeFormat('en', { month: 'long', day: 'numeric', year: 'numeric' }).format(new Date(value))
-}
 </script>
 
 <template>

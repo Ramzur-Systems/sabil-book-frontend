@@ -68,10 +68,21 @@ export const handlers = [
     const user = currentUser()
     if (!user) return HttpResponse.json({ detail: 'Not signed in' }, { status: 401 })
     if (!user.isProvider) return HttpResponse.json({ detail: 'Only providers can create posts' }, { status: 403 })
-    const parsed = postDraftSchema.safeParse(await request.json())
+    const formData = await request.formData()
+    const parsed = postDraftSchema.safeParse({
+      text: formData.get('text'),
+      images: formData.getAll('images'),
+    })
     if (!parsed.success) return HttpResponse.json({ detail: 'Invalid post' }, { status: 400 })
     const now = new Date().toISOString()
-    const post = { id: `post-${Date.now()}`, authorId: user.id, ...parsed.data, createdAt: now, updatedAt: now }
+    const post = {
+      id: `post-${Date.now()}`,
+      authorId: user.id,
+      text: parsed.data.text,
+      imageUrls: parsed.data.images.map((file) => URL.createObjectURL(file)),
+      createdAt: now,
+      updatedAt: now,
+    }
     posts.unshift(post)
     return HttpResponse.json(post, { status: 201 })
   }),

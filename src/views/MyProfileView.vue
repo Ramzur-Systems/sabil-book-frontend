@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { marketplace } from '../api/marketplace'
 import { useSessionStore } from '../stores/session'
 import PostCarousel from '../components/PostCarousel.vue'
+import { displayDate } from '../lib/utils'
 
 const session = useSessionStore()
 const providerId = computed(() => session.user?.providerId || '')
@@ -17,14 +18,17 @@ const postsQuery = useQuery({
   queryFn: () => marketplace.expertPosts(providerId.value),
   enabled: computed(() => Boolean(providerId.value)),
 })
-function displayDate(value: string) {
-  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
-}
 </script>
 
 <template>
   <div class="page narrow">
-    <template v-if="!session.user?.isProvider">
+    <template v-if="!session.signedIn">
+      <div class="eyebrow">Provider profile</div>
+      <h1>Sign in to view your profile</h1>
+      <p class="page-intro">Sign in to see how your work and posts appear to the community.</p>
+      <RouterLink to="/login" class="button">Sign in</RouterLink>
+    </template>
+    <template v-else-if="!session.user?.isProvider">
       <div class="eyebrow">Provider profile</div>
       <h1>Provider profile unavailable</h1>
       <p class="page-intro">Create a provider profile before sharing posts with the community.</p>
@@ -52,6 +56,7 @@ function displayDate(value: string) {
         <section class="my-posts">
           <div class="section-top compact"><div><div class="eyebrow">Your posts</div><h2>Shared knowledge</h2></div></div>
           <p v-if="postsQuery.isPending.value" class="loading-state">Loading your posts…</p>
+          <p v-else-if="postsQuery.isError.value" class="error-state">Your posts could not be loaded.</p>
           <p v-else-if="!postsQuery.data.value?.length" class="empty-state">Your posts will appear here after you publish one.</p>
           <div v-else class="post-list">
             <article v-for="post in postsQuery.data.value" :key="post.id" class="post-card">

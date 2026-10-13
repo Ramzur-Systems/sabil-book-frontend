@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/vue-query'
 import { marketplace } from '../api/marketplace'
 import BaseButton from '../components/BaseButton.vue'
 import PostCarousel from '../components/PostCarousel.vue'
+import { displayDate } from '../lib/utils'
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const query = useQuery({
@@ -15,9 +16,6 @@ const postsQuery = useQuery({
   queryKey: computed(() => ['expert-posts', id.value]),
   queryFn: () => marketplace.expertPosts(id.value),
 })
-function displayDate(value: string) {
-  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(value))
-}
 </script>
 <template>
   <div class="page narrow">
@@ -57,6 +55,7 @@ function displayDate(value: string) {
         <div class="eyebrow">From {{ query.data.value.name.split(' ')[0] }}</div>
         <h2 class="text-3xl">Recent posts</h2>
         <p v-if="postsQuery.isPending.value" class="loading-state">Loading posts…</p>
+        <p v-else-if="postsQuery.isError.value" class="error-state">Posts could not be loaded.</p>
         <p v-else-if="!postsQuery.data.value?.length" class="meta">No posts shared yet.</p>
         <div v-else class="post-list">
           <article v-for="post in postsQuery.data.value" :key="post.id" class="post-card">

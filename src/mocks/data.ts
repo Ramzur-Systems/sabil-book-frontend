@@ -56,6 +56,7 @@ export const experts: Expert[] = [
   },
   {
     id: 'marat',
+    userId: 'user-marat',
     name: 'Marat Seitzhan',
     initials: 'MS',
     bio: 'Operations specialist creating practical playbooks and process documentation.',
@@ -66,6 +67,7 @@ export const experts: Expert[] = [
   },
   {
     id: 'dana',
+    userId: 'user-dana',
     name: 'Dana Kim',
     initials: 'DK',
     bio: 'Educator writing thoughtful study guides and original learning materials.',

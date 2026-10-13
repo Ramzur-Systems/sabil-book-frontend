@@ -48,7 +48,7 @@ export const offerDraftSchema = z.object({
   message: z.string().trim().min(20, 'Explain your approach in at least 20 characters').max(1000),
 })
 export const postDraftSchema = z.object({
-  imageUrls: z.array(z.string()).min(1, 'Choose at least one photo'),
+  images: z.array(z.instanceof(File)).min(1, 'Choose at least one photo'),
   text: z.string().trim().min(1, 'Write something to share').max(2_000),
 })
 export type MarketplaceRequest = z.infer<typeof requestSchema>
