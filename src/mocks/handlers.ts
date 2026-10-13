@@ -1,12 +1,25 @@
 import { http, HttpResponse } from 'msw'
-import { experts, requests } from './data'
-import { offerDraftSchema, requestDraftSchema } from '../api/types'
+import { experts, posts, requests } from './data'
+import { offerDraftSchema, postDraftSchema, requestDraftSchema } from '../api/types'
 
 const prefix = '*/api/v1'
 const myOffers = [
   { id: 'sample-offer', title: requests[0].title, price: '$430', days: 7, status: 'Submitted' },
 ]
 const demoUserKey = 'sabil-demo-user'
+const providerUser = {
+  id: 'user-aida',
+  name: 'Aida Nurgaliyeva',
+  email: 'aida@sabil.app',
+  isProvider: true,
+  providerId: 'aida',
+}
+
+function currentUser() {
+  const saved = sessionStorage.getItem(demoUserKey)
+  return saved ? (JSON.parse(saved) as { id: string; isProvider: boolean; providerId?: string }) : null
+}
+
 export const handlers = [
   http.get(`${prefix}/requests/`, () => HttpResponse.json(requests)),
   http.get(`${prefix}/requests/:id/`, ({ params }) => {
@@ -45,12 +58,41 @@ export const handlers = [
       ? HttpResponse.json(item)
       : HttpResponse.json({ detail: 'Expert not found' }, { status: 404 })
   }),
+  http.get(`${prefix}/posts/`, () => HttpResponse.json(posts)),
+  http.get(`${prefix}/experts/:id/posts/`, ({ params }) => {
+    const expert = experts.find((item) => item.id === params.id)
+    if (!expert) return HttpResponse.json({ detail: 'Expert not found' }, { status: 404 })
+    return HttpResponse.json(posts.filter((post) => post.authorId === expert.userId))
+  }),
+  http.post(`${prefix}/posts/`, async ({ request }) => {
+    const user = currentUser()
+    if (!user) return HttpResponse.json({ detail: 'Not signed in' }, { status: 401 })
+    if (!user.isProvider) return HttpResponse.json({ detail: 'Only providers can create posts' }, { status: 403 })
+    const formData = await request.formData()
+    const parsed = postDraftSchema.safeParse({
+      text: formData.get('text'),
+      images: formData.getAll('images'),
+    })
+    if (!parsed.success) return HttpResponse.json({ detail: 'Invalid post' }, { status: 400 })
+    const now = new Date().toISOString()
+    const post = {
+      id: `post-${Date.now()}`,
+      authorId: user.id,
+      text: parsed.data.text,
+      imageUrls: parsed.data.images.map((file) => URL.createObjectURL(file)),
+      createdAt: now,
+      updatedAt: now,
+    }
+    posts.unshift(post)
+    return HttpResponse.json(post, { status: 201 })
+  }),
   http.post(`${prefix}/auth/login/`, async ({ request }) => {
     const body = (await request.json()) as { email?: string }
-    const user = {
+    const user = body.email?.trim().toLowerCase() === providerUser.email ? providerUser : {
       id: 'demo-user',
       name: 'Demo Member',
       email: body.email || 'demo@example.com',
+      isProvider: false,
     }
     sessionStorage.setItem(demoUserKey, JSON.stringify(user))
     return HttpResponse.json(user)
@@ -61,6 +103,7 @@ export const handlers = [
       id: 'demo-user',
       name: body.name || 'Demo Member',
       email: body.email || 'demo@example.com',
+      isProvider: false,
     }
     sessionStorage.setItem(demoUserKey, JSON.stringify(user))
     return HttpResponse.json(user, { status: 201 })
