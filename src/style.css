@@ -3177,3 +3177,133 @@ h2 {
   font-size: 0.82rem;
   color: #63716d;
 }
+
+/* Offer conversation */
+.chat {
+  margin-top: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.chat-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  background: #fffbf6;
+  border: 1px solid #e4d8c8;
+  border-radius: 14px;
+}
+.chat-who {
+  min-width: 0;
+  flex: 1;
+}
+.page .chat-who h1 {
+  font-size: 2.1rem;
+  line-height: 1;
+  margin: 0 0 4px;
+}
+.chat-who p {
+  margin: 0;
+  font-size: 0.86rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-terms {
+  display: flex;
+  gap: 22px;
+  margin: 0;
+}
+.chat-terms dt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #6a7480;
+}
+.chat-terms dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+}
+.chat-log {
+  list-style: none;
+  margin: 0;
+  padding: 22px;
+  height: min(52vh, 520px);
+  min-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #fbf6ec;
+  border: 1px solid #e4d8c8;
+  border-radius: 14px;
+}
+.bubble {
+  max-width: min(78%, 520px);
+  padding: 11px 15px 9px;
+  border-radius: 14px 14px 14px 4px;
+  background: #fffbf6;
+  border: 1px solid #e4d8c8;
+}
+.bubble.me {
+  align-self: flex-end;
+  border-radius: 14px 14px 4px 14px;
+  background: #e4efea;
+  border-color: #c4dbd2;
+}
+.bubble p {
+  margin: 0;
+  color: var(--ink);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.bubble time {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.72rem;
+  color: #5e6b68;
+}
+.chat-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+.chat-form .input {
+  resize: vertical;
+  min-height: 50px;
+  max-height: 160px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.plain-row .link-arrow {
+  white-space: nowrap;
+}
+@media (max-width: 640px) {
+  .chat-head {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+  .chat-terms {
+    width: 100%;
+  }
+  .chat-log {
+    padding: 14px;
+    height: 55vh;
+  }
+  .bubble {
+    max-width: 90%;
+  }
+  .chat-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

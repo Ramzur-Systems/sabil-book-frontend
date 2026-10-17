@@ -27,6 +27,7 @@ const mutation = useMutation({
           ><small>{{ offer.price }} · {{ offer.days }} days</small></span
         ><span class="flex items-center gap-3"
           ><span class="pill brass">{{ offer.status }}</span
+          ><RouterLink :to="`/app/offers/${offer.id}/chat`" class="link-arrow">Message ↗</RouterLink
           ><button class="button text" @click="mutation.mutate(offer.id)">Withdraw</button></span
         >
       </div>
