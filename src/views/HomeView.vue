@@ -44,10 +44,11 @@ const journey = [
     <div class="shell hero-grid">
       <div class="hero-copy">
         <div class="eyebrow">Sabil Qalam · A marketplace for knowledge</div>
-        <h1>The document you need, <em>thoughtfully written.</em></h1>
+        <h1>The knowledge you need, <em>The way you need it.</em></h1>
         <p>
-          Tell us what you need and set your budget. Experts offer their approach, price and
-          delivery time. Your payment is held until you accept the finished work.
+          Describe your request, set your budget, and receive offers from people with the right expertise or materials.
+          Compare their approach, price, and delivery time, then choose the offer that suits you.
+          Your payment is held securely until you accept the final work.
         </p>
         <div class="hero-actions">
           <BaseButton to="/requests/new">Post a request ↗</BaseButton
@@ -173,7 +174,7 @@ const journey = [
         <h2>Post the need. <em>Find the right person.</em> Move forward.</h2>
         <BaseButton to="/requests/new">Post a request ↗</BaseButton>
       </div>
-      <img class="closing-emblem" src="/nib-mark.svg" alt="" aria-hidden="true" />
+
     </div>
   </section>
 </template>

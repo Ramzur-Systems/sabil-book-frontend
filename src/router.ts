@@ -35,6 +35,11 @@ export const router = createRouter({
       meta: { title: 'Expert profile' },
     },
     {
+      path: '/posts',
+      component: () => import('./views/PostsView.vue'),
+      meta: { title: 'Community posts' },
+    },
+    {
       path: '/how-it-works',
       component: () => import('./views/HowView.vue'),
       meta: { title: 'How it works' },
@@ -95,6 +100,16 @@ export const router = createRouter({
       path: '/app/settings',
       component: () => import('./views/SettingsView.vue'),
       meta: { title: 'Settings' },
+    },
+    {
+      path: '/app/profile',
+      component: () => import('./views/MyProfileView.vue'),
+      meta: { title: 'My provider profile' },
+    },
+    {
+      path: '/app/posts/new',
+      component: () => import('./views/NewPostView.vue'),
+      meta: { title: 'Create post' },
     },
     {
       path: '/:pathMatch(.*)*',
