@@ -15,16 +15,21 @@ const query = useQuery({
 const draft = ref('')
 const log = ref<HTMLElement | null>(null)
 const mutation = useMutation({
-  mutationFn: (text: string) => account.sendMessage(offerId.value, text),
-  onSuccess: async () => {
-    draft.value = ''
-    await client.invalidateQueries({ queryKey: ['chat', offerId.value] })
+  mutationFn: ({ id, text }: { id: string; text: string }) => account.sendMessage(id, text),
+  onSuccess: async (_data, { id }) => {
+    if (id === offerId.value) draft.value = ''
+    await client.invalidateQueries({ queryKey: ['chat', id] })
   },
 })
 function send() {
   const text = draft.value.trim()
-  if (text && !mutation.isPending.value) mutation.mutate(text)
+  if (text && !mutation.isPending.value) mutation.mutate({ id: offerId.value, text })
 }
+watch(offerId, () => {
+  draft.value = ''
+  mutation.reset()
+})
+
 function onKey(event: KeyboardEvent) {
   if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault()
@@ -33,9 +38,13 @@ function onKey(event: KeyboardEvent) {
 }
 watch(
   () => query.data.value?.messages.length,
-  async () => {
+  async (_len, prevLen) => {
+    const el = log.value
+    const nearBottom = !el || el.scrollHeight - el.scrollTop < el.clientHeight + 100
     await nextTick()
-    log.value?.scrollTo({ top: log.value.scrollHeight })
+    if (log.value && (prevLen === undefined || nearBottom)){
+      log.value?.scrollTo({ top: log.value.scrollHeight })
+    }
   },
   { immediate: true, flush: 'post' },
 )
@@ -44,7 +53,7 @@ watch(
   <div class="page narrow">
     <RouterLink to="/app/offers" class="link-arrow">← My offers</RouterLink>
     <p v-if="query.isPending.value" class="loading-state">Loading conversation…</p>
-    <p v-else-if="query.isError.value" class="error-state">Could not load this conversation.</p>
+    <p v-else-if="query.isError.value && !query.data.value" class="error-state">Could not load this conversation.</p>
     <section v-else-if="query.data.value" class="chat" aria-label="Conversation">
       <header class="chat-head">
         <span class="avatar" aria-hidden="true">{{ query.data.value.initials }}</span>

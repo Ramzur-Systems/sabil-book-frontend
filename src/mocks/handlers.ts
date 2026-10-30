@@ -1,12 +1,7 @@
 import { http, HttpResponse } from 'msw'
-<<<<<<< HEAD
-import { experts, requests } from './data'
-import { offerDraftSchema, requestDraftSchema } from '../api/types'
 import type { ChatMessage } from '../api/account'
-=======
 import { experts, posts, requests } from './data'
 import { offerDraftSchema, postDraftSchema, requestDraftSchema } from '../api/types'
->>>>>>> 8815b51f3a391d834773d1dcb3088a4d0af81013
 
 const prefix = '*/api/v1'
 const myOffers = [
