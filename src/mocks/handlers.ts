@@ -1,4 +1,5 @@
 import { http, HttpResponse } from 'msw'
+import type { ChatMessage } from '../api/account'
 import { experts, posts, requests } from './data'
 import { offerDraftSchema, postDraftSchema, requestDraftSchema } from '../api/types'
 
@@ -6,6 +7,32 @@ const prefix = '*/api/v1'
 const myOffers = [
   { id: 'sample-offer', title: requests[0].title, price: '$430', days: 7, status: 'Submitted' },
 ]
+const chats: Record<string, { counterpart: string; initials: string; messages: ChatMessage[] }> = {
+  'sample-offer': {
+    counterpart: 'Aida Nurgaliyeva',
+    initials: 'AN',
+    messages: [
+      {
+        id: 'm1',
+        from: 'them',
+        text: 'Hello, I read the brief. Do you already have a list of the five competitors you want covered, or should I propose them?',
+        at: '09:12',
+      },
+      {
+        id: 'm2',
+        from: 'me',
+        text: 'Please propose them. We can adjust once I see the shortlist.',
+        at: '09:40',
+      },
+      {
+        id: 'm3',
+        from: 'them',
+        text: 'Understood. I will send the shortlist with sources before I start the full draft.',
+        at: '09:46',
+      },
+    ],
+  },
+}
 const demoUserKey = 'sabil-demo-user'
 const providerUser = {
   id: 'user-aida',
@@ -151,6 +178,36 @@ export const handlers = [
     const index = myOffers.findIndex((offer) => offer.id === params.id)
     if (index !== -1) myOffers.splice(index, 1)
     return new HttpResponse(null, { status: 204 })
+  }),
+  http.get(`${prefix}/offers/:id/chat/`, ({ params }) => {
+    const offer = myOffers.find((o) => o.id === params.id)
+    const chat = chats[String(params.id)]
+    if (!offer || !chat)
+      return HttpResponse.json({ detail: 'Conversation not found' }, { status: 404 })
+    return HttpResponse.json({
+      offerId: offer.id,
+      title: offer.title,
+      counterpart: chat.counterpart,
+      initials: chat.initials,
+      price: offer.price,
+      days: offer.days,
+      messages: chat.messages,
+    })
+  }),
+  http.post(`${prefix}/offers/:id/chat/`, async ({ params, request }) => {
+    const chat = chats[String(params.id)]
+    const body = (await request.json()) as { text?: string }
+    const text = body.text?.trim()
+    if (!chat || !text) return HttpResponse.json({ detail: 'Invalid message' }, { status: 400 })
+    const now = new Date()
+    const message: ChatMessage = {
+      id: `m-${Date.now()}`,
+      from: 'me',
+      text,
+      at: now.toTimeString().slice(0, 5),
+    }
+    chat.messages.push(message)
+    return HttpResponse.json(message, { status: 201 })
   }),
   http.post(`${prefix}/providers/onboarding/`, () => new HttpResponse(null, { status: 204 })),
   http.patch(`${prefix}/account/settings/`, () => new HttpResponse(null, { status: 204 })),

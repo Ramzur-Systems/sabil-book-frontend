@@ -10,6 +10,16 @@ export type Order = {
   status: string
 }
 export type MyOffer = { id: string; title: string; price: string; days: number; status: string }
+export type ChatMessage = { id: string; from: 'me' | 'them'; text: string; at: string }
+export type ChatThread = {
+  offerId: string
+  title: string
+  counterpart: string
+  initials: string
+  price: string
+  days: number
+  messages: ChatMessage[]
+}
 export type Earnings = {
   total: string
   pending: string
@@ -21,6 +31,12 @@ export const account = {
   order: (id: string) => api<Order>(`/orders/${encodeURIComponent(id)}/`),
   offers: () => api<MyOffer[]>('/account/offers/'),
   earnings: () => api<Earnings>('/account/earnings/'),
+  chat: (offerId: string) => api<ChatThread>(`/offers/${encodeURIComponent(offerId)}/chat/`),
+  sendMessage: (offerId: string, text: string) =>
+    api<ChatMessage>(`/offers/${encodeURIComponent(offerId)}/chat/`, {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    }),
   orderAction: (id: string, action: 'correction' | 'dispute' | 'accept', reason = '') =>
     api<void>(`/orders/${encodeURIComponent(id)}/${action}/`, {
       method: 'POST',

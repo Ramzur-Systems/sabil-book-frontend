@@ -82,6 +82,11 @@ export const router = createRouter({
       meta: { title: 'My offers' },
     },
     {
+      path: '/app/offers/:id/chat',
+      component: () => import('./views/ChatView.vue'),
+      meta: { title: 'Messages' },
+    },
+    {
       path: '/app/earnings',
       component: () => import('./views/EarningsView.vue'),
       meta: { title: 'Earnings' },
