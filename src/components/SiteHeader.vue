@@ -51,7 +51,8 @@ async function signOut() {
           <RouterLink to="/requests">Open requests</RouterLink
           ><RouterLink to="/experts">Experts</RouterLink>
           <RouterLink to="/posts">Posts</RouterLink>
-          <RouterLink to="/how-it-works">How it works</RouterLink
+          <RouterLink to="/how-it-works">How it works</RouterLink>
+          <RouterLink to="/about">About us</RouterLink
           ><RouterLink to="/login">Sign in</RouterLink>
           <BaseButton to="/register" size="small">Sign up</BaseButton>
         </template>

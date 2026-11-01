@@ -45,6 +45,11 @@ export const router = createRouter({
       meta: { title: 'How it works' },
     },
     {
+      path: '/about',
+      component: () => import('./views/AboutView.vue'),
+      meta: { title: 'About us' },
+    },
+    {
       path: '/login',
       component: () => import('./views/AuthView.vue'),
       props: { mode: 'login' },
