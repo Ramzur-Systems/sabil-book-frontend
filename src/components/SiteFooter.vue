@@ -13,7 +13,8 @@
           <div class="footer-links">
             <RouterLink to="/requests">Open requests</RouterLink
             ><RouterLink to="/experts">Experts</RouterLink
-            ><RouterLink to="/how-it-works">How it works</RouterLink>
+            ><RouterLink to="/how-it-works">How it works</RouterLink
+            ><RouterLink to="/about">About us</RouterLink>
           </div>
         </div>
         <div>
