@@ -395,6 +395,12 @@ p {
 .section {
   padding: 86px 0;
 }
+.section.section-flush-top {
+  padding-top: 20px;
+}
+.section.section-flush-bottom {
+  padding-bottom: 40px;
+}
 .section-top {
   display: flex;
   align-items: end;

@@ -38,6 +38,7 @@ async function signOut() {
           <RouterLink to="/app">Workspace</RouterLink
           ><RouterLink to="/requests">Open requests</RouterLink>
           <RouterLink to="/posts">Posts</RouterLink>
+          <RouterLink to="/about">About us</RouterLink>
           <template v-if="session.user?.isProvider">
             <RouterLink to="/app/profile">My profile</RouterLink>
             <RouterLink to="/app/posts/new">Create post</RouterLink>
@@ -51,8 +52,8 @@ async function signOut() {
           <RouterLink to="/requests">Open requests</RouterLink
           ><RouterLink to="/experts">Experts</RouterLink>
           <RouterLink to="/posts">Posts</RouterLink>
-          <RouterLink to="/how-it-works">How it works</RouterLink>
-          <RouterLink to="/about">About us</RouterLink
+          <RouterLink to="/how-it-works">How it works</RouterLink
+          ><RouterLink to="/about">About us</RouterLink
           ><RouterLink to="/login">Sign in</RouterLink>
           <BaseButton to="/register" size="small">Sign up</BaseButton>
         </template>
